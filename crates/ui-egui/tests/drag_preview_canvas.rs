@@ -176,12 +176,20 @@ fn marquee_previews_show_while_dragging_on_white_and_black_at_1x_and_2x() {
                     }
                 } else {
                     // The ellipse touches its box at the edge midpoints: check short arcs there.
+                    // The ants march (a period is about three frames here), and in some phases a
+                    // short arc sits mostly under dashes; which phase this frame has depends on
+                    // how many frames ran before. So look over a whole period, button held.
+                    let mut frames = vec![img];
+                    for _ in 0..3 {
+                        h.step();
+                        frames.push(render(&mut h));
+                    }
                     let c = screen(&h, 200.0, 150.0);
                     let (rx, ry) = (100.0, 70.0);
                     for (dx, dy) in [(0.0, -ry), (rx, 0.0), (0.0, ry), (-rx, 0.0)] {
                         let m = c + egui::vec2(dx, dy);
                         let along = if dx == 0.0 { egui::vec2(14.0, 0.0) } else { egui::vec2(0.0, 14.0) };
-                        let now = coverage(&img, ppp, m - along, m + along, ink(bg));
+                        let now = frames.iter().map(|f| coverage(f, ppp, m - along, m + along, ink(bg))).fold(0.0, f32::max);
                         assert!(now > 0.3, "{tool} on {bg} @{ppp}x at {m:?}: {now:.2} contrasting");
                     }
                 }
