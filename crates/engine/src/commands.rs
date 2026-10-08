@@ -1096,6 +1096,7 @@ fn build() -> Vec<CommandSpec> {
     v.extend(crate::fx_view_cmds::specs());
     v.extend(crate::mask_view_cmds::specs());
     v.extend(crate::actions_cmds::specs());
+    v.extend(crate::home_cmds::specs());
     v
 }
 

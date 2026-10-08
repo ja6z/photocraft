@@ -42,6 +42,8 @@ pub mod gallery_cmds;
 pub mod gradient_fill_cmds;
 pub mod group_view_cmds;
 pub mod hidden_target;
+pub mod home_cmds;
+pub mod home_thumbs;
 pub mod image_cmds;
 pub mod inspect;
 pub mod jobs;
@@ -309,6 +311,9 @@ pub struct Session {
     /// the same check a top-level request sees. `None` runs everything, which is what a local
     /// UI and `photocraft-cli run` do.
     pub authorize: Option<fn(&str, &serde_json::Value) -> Result<()>>,
+    /// Home: the thumbnail folder and the folder each open document belongs to (see
+    /// [`home_cmds`]).
+    pub home: home_cmds::HomeState,
     /// Background jobs (see [`jobs`]).
     jobs: jobs::Jobs,
 }
@@ -384,6 +389,7 @@ impl Session {
         smart_cmds::on_close(self, index);
         if let Some(id) = self.docs.get(index).map(|d| d.doc.id) {
             self.cancel_jobs_on(id);
+            self.home.doc_folders.remove(&id);
         }
         let d = self.docs.remove(index);
         self.active = if self.docs.is_empty() { None } else { Some(index.min(self.docs.len() - 1)) };

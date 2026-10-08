@@ -781,6 +781,9 @@ pub struct Preferences {
     pub dialogs: BTreeMap<String, Value>,
     /// File › Scripts › Script Events Manager: event → script bindings.
     pub script_events: crate::automate_cmds::ScriptEvents,
+    /// Home: project folders, when recent files were opened, where new folders go (see
+    /// `home_cmds`). Not a Preferences dialog section.
+    pub home: crate::home_cmds::HomePrefs,
 }
 
 /// Preferences dialog sections in Photoshop's order: (id, title).
