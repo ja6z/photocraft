@@ -63,7 +63,8 @@ impl PhotocraftApp {
     }
 
     /// Record that the active document was just opened from `path`: File › Save writes back to it
-    /// (unless it's a template) and it goes to the top of Open Recent.
+    /// (unless it's a template) and it goes to the top of Open Recent. Home gets its thumbnail if
+    /// it has none yet, and a file opened from a Home folder belongs to that folder.
     pub(crate) fn opened_from(&mut self, path: &str) {
         if !is_template(path)
             && let Some(st) = self.session.active_mut()
@@ -71,6 +72,7 @@ impl PhotocraftApp {
             st.path = Some(path.to_string());
         }
         self.push_recent(path);
+        crate::home_ui::document_opened(self, path);
     }
 
     /// The name a file called `name` opens under: its own, or the first free "Untitled-N" for a

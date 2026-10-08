@@ -2560,3 +2560,64 @@ cameraRaw	Blending	Pembauran
 	Lines +/−	Baris +/−
 	@{login}: {prs} PRs, {commits} commits, +{added} / −{deleted} lines (Δ {delta}), +{binAdded} / −{binDeleted} binary assets, {first} – {last}	@{login}: {prs} PR, {commits} commit, +{added} / −{deleted} baris (Δ {delta}), +{binAdded} / −{binDeleted} berkas biner, {first} – {last}
 	Apply At Canvas Bounds	Terapkan efek di batas kanvas
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Tampilkan di Finder
+	Show in Explorer	Tampilkan di Explorer
+	Show in Folder	Tampilkan di folder
+	Folders	Folder
+	New Folder…	Folder baru…
+	New Folder	Folder baru
+	Rename Folder	Ganti nama folder
+	Folder Paths	Jalur folder
+	Folder Paths…	Jalur folder…
+	Folders keep a project's files together and set where they're saved.	Folder menyatukan file sebuah proyek dan menentukan tempat file disimpan.
+	This folder isn't on disk any more.	Folder ini sudah tidak ada di disk.
+	Remove from Home	Hapus dari Beranda
+homePage	Home	Beranda
+	Presets or a custom size	Preset atau ukuran khusus
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG, dan lainnya
+	Recently opened	Baru dibuka
+	No recent files yet	Belum ada file terbaru
+	Files you open or save show up here, newest first.	File yang Anda buka atau simpan muncul di sini, yang terbaru lebih dulu.
+	New Document Here…	Dokumen baru di sini…
+	Projects	Proyek
+	Exports	Ekspor
+	Resources	Sumber
+	same as Projects	sama dengan Proyek
+	Click to choose another folder.	Klik untuk memilih folder lain.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Folder ini sudah tidak ada di disk. Pilih lokasinya sekarang lewat Proyek di atas.
+	Files	File
+	This folder is empty	Folder ini kosong
+	Save a document here, or add files to it from Recent.	Simpan dokumen di sini, atau tambahkan file dari Terbaru.
+	Showing files in the file manager isn't available here.	Menampilkan file di pengelola file tidak tersedia di sini.
+	Added {name} to the folder.	{name} ditambahkan ke folder.
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} sudah tidak ada: file dipindahkan, diganti namanya, atau dihapus.
+@plural	{n} file|{n} files	{n} file
+	Opened just now	Baru saja dibuka
+	Modified just now	Baru saja diubah
+	Opened {n} min ago	Dibuka {n} menit lalu
+	Modified {n} min ago	Diubah {n} menit lalu
+	Opened today at {time}	Dibuka hari ini pukul {time}
+	Modified today at {time}	Diubah hari ini pukul {time}
+	Opened yesterday at {time}	Dibuka kemarin pukul {time}
+	Modified yesterday at {time}	Diubah kemarin pukul {time}
+	Opened {date}	Dibuka {date}
+	Modified {date}	Diubah {date}
+homeBadge	Open	Terbuka
+	File missing	File hilang
+	Remove {name} from Recent	Hapus {name} dari Terbaru
+	Remove from Recent	Hapus dari Terbaru
+	Add to Folder	Tambahkan ke folder
+	Remove from Folder	Hapus dari folder
+	Folder name	Nama folder
+	No folder chosen	Belum ada folder yang dipilih
+	For example: Flyers 2026	Contoh: Flyer 2026
+	Change…	Ubah…
+	Create a new folder in:	Buat folder baru di:
+	Use an existing folder:	Gunakan folder yang ada:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft tidak pernah memindahkan atau menghapus file Anda. Menghapus folder dari Beranda hanya mengeluarkannya dari daftar.
+	Save As and Save a Copy start here (.psd, .pcraft).	Simpan Sebagai dan Simpan Salinan dimulai di sini (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	Ekspor Sebagai, Ekspor Cepat, dan Simpan untuk Web dimulai di sini (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	Buka dan Tempatkan dimulai di sini: foto, logo, dan materi lainnya.
+	Same as Projects until you choose one.	Sama dengan Proyek sampai Anda memilih yang lain.

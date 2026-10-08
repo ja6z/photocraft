@@ -2150,3 +2150,66 @@ cameraRaw	Blending	混合
 	Lines +/−	行数 +/−
 	@{login}: {prs} PRs, {commits} commits, +{added} / −{deleted} lines (Δ {delta}), +{binAdded} / −{binDeleted} binary assets, {first} – {last}	@{login}：{prs} 个 PR，{commits} 次提交，行 +{added} / −{deleted}（Δ {delta}），二进制文件 +{binAdded} / −{binDeleted}，{first} – {last}
 	Apply At Canvas Bounds	应用画布边界的效果
+
+# Home (start page): recent files and project folders.
+	Show in Finder	在访达中显示
+	Show in Explorer	在资源管理器中显示
+	Show in Folder	在文件夹中显示
+	Folders	文件夹
+	New Folder…	新建文件夹…
+	New Folder	新建文件夹
+	Rename Folder	重命名文件夹
+	Folder Paths	文件夹路径
+	Folder Paths…	文件夹路径…
+	Folders keep a project's files together and set where they're saved.	文件夹把一个项目的文件放在一起，并决定它们保存的位置。
+	This folder isn't on disk any more.	此文件夹已不在磁盘上。
+	Remove from Home	从主页移除
+homePage	Home	主页
+	Presets or a custom size	预设或自定义尺寸
+	PSD, PhotoCraft, PNG, JPEG and more	PSD、PhotoCraft、PNG、JPEG 等
+	Recently opened	最近打开
+	No recent files yet	暂无最近使用的文件
+	Files you open or save show up here, newest first.	你打开或保存的文件会按从新到旧的顺序显示在这里。
+	New Document Here…	在此新建文档…
+	Projects	项目
+	Exports	导出
+	Resources	素材
+	same as Projects	同项目
+	Click to choose another folder.	点击以选择其他文件夹。
+	This folder isn't on disk any more. Choose where it is now with Projects above.	此文件夹已不在磁盘上。请在上方的“项目”中选择它现在的位置。
+	Files	文件
+	This folder is empty	此文件夹为空
+	Save a document here, or add files to it from Recent.	在此保存文档，或从最近打开的文件中添加。
+	Showing files in the file manager isn't available here.	此处无法在文件管理器中显示文件。
+	Added {name} to the folder.	已将 {name} 添加到文件夹。
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} 已不在原处：它已被移动、重命名或删除。
+@plural	{n} file|{n} files	{n} 个文件
+	Opened just now	刚刚打开
+	Modified just now	刚刚修改
+	Opened {n} min ago	{n} 分钟前打开
+	Modified {n} min ago	{n} 分钟前修改
+	Opened today at {time}	今天 {time} 打开
+	Modified today at {time}	今天 {time} 修改
+	Opened yesterday at {time}	昨天 {time} 打开
+	Modified yesterday at {time}	昨天 {time} 修改
+	Opened {date}	{date} 打开
+	Modified {date}	{date} 修改
+homeBadge	Open	已打开
+	File missing	文件丢失
+	Remove {name} from Recent	从最近打开中移除 {name}
+	Remove from Recent	从最近打开中移除
+	Add to Folder	添加到文件夹
+	Remove from Folder	从文件夹中移除
+	Folder name	文件夹名称
+	No folder chosen	未选择文件夹
+	For example: Flyers 2026	例如：传单 2026
+	Change…	更改…
+	Choose…	选择…
+	Create a new folder in:	在以下位置新建文件夹：
+	Use an existing folder:	使用现有文件夹：
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft 从不移动或删除你的文件。从主页移除文件夹只会把它从列表中拿掉。
+	Save As and Save a Copy start here (.psd, .pcraft).	“另存为”和“保存副本”从这里开始（.psd、.pcraft）。
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	“导出为”、快速导出和“存储为 Web 所用格式”从这里开始（PNG、JPEG 等）。
+	Open and Place start here: photos, logos and other material.	“打开”和“置入”从这里开始：照片、标志和其他素材。
+	Same as Projects until you choose one.	在你选择之前与项目相同。
+	Reset	重置

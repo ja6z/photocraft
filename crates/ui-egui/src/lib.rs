@@ -64,6 +64,9 @@ pub mod gpu_canvas;
 pub mod gpu_status;
 pub mod gradient_ui;
 pub mod hold_keys;
+mod home_cards;
+mod home_dialogs;
+pub mod home_ui;
 pub mod i18n;
 mod icon_data;
 pub mod icons;
@@ -182,11 +185,20 @@ impl Default for ExportSettings {
 /// Encode a document: (file bytes, warnings about anything approximated or dropped).
 pub type ExportFn = Box<dyn Fn(&Document, &str, &ExportSettings) -> Result<(Vec<u8>, Vec<String>), String>>;
 /// The picked file's name and its bytes, or why it could not be read (shown like any other open
-/// failure); `None` when the dialog was cancelled.
-pub type PickOpenFn = Box<dyn FnMut() -> Option<(String, Result<Vec<u8>, String>)>>;
-/// File › Open's multi-file picker: the selected paths, `None` when cancelled.
-pub type PickOpenPathsFn = Box<dyn FnMut() -> Option<Vec<String>>>;
+/// failure); `None` when the dialog was cancelled. The argument is the directory the dialog
+/// starts in (a Home folder's Resources path, the active document's folder…), when there is one.
+pub type PickOpenFn = Box<dyn FnMut(Option<&str>) -> Option<(String, Result<Vec<u8>, String>)>>;
+/// File › Open's multi-file picker: the selected paths, `None` when cancelled. The argument is
+/// the directory it starts in.
+pub type PickOpenPathsFn = Box<dyn FnMut(Option<&str>) -> Option<Vec<String>>>;
+/// A "save file" dialog for a suggested path or name; returns the path to write. When the
+/// suggestion has a directory part, the dialog starts in that directory.
 pub type PickSaveFn = Box<dyn FnMut(&str) -> Option<String>>;
+/// A folder picker (Home's folder paths), starting in the given directory; the chosen
+/// directory, `None` when cancelled.
+pub type PickFolderFn = Box<dyn FnMut(Option<&str>) -> Option<String>>;
+/// Show a file or folder in the system file manager (Finder, Explorer).
+pub type RevealFn = Box<dyn Fn(&str) -> Result<(), String>>;
 pub type WriteFn = Box<dyn FnMut(&str, &[u8]) -> Result<(), String>>;
 /// Read bytes through the desktop control session's authorized read root.
 pub type AutomationReadFn = Box<dyn FnMut(&str) -> Result<(String, Vec<u8>), String>>;
@@ -247,6 +259,13 @@ pub struct Services {
     pub pick_open_paths: Option<PickOpenPathsFn>,
     /// Show a "save file" dialog; returns a path/name to write.
     pub pick_save: Option<PickSaveFn>,
+    /// Show a folder picker (Home's folders); returns the chosen directory.
+    pub pick_folder: Option<PickFolderFn>,
+    /// Show a path in the system file manager (Home's Show in Finder).
+    pub reveal: Option<RevealFn>,
+    /// The local time zone's offset from UTC, in seconds, at a Unix time (Home's "today 14:05").
+    /// Without it times read as UTC.
+    pub local_offset: Option<fn(i64) -> i32>,
     /// Write bytes to a path (native) or trigger a download (web).
     pub write: Option<WriteFn>,
     /// File access used only by control/MCP requests. Interactive dialogs keep
@@ -468,6 +487,8 @@ pub struct PhotocraftApp {
     pub background_jobs: bool,
     /// Background job bookkeeping: opening tabs, control replies waiting on a job.
     pub jobs: jobs_ui::JobsUi,
+    /// Home page caches, thumbnail textures and the thumbnail worker (see `home_ui`).
+    pub home: home_ui::Runtime,
     #[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
     live_tokens: theme::live::LiveTokens,
 }
@@ -557,6 +578,7 @@ impl PhotocraftApp {
             stylus: Default::default(),
             background_jobs: false,
             jobs: Default::default(),
+            home: Default::default(),
             #[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
             live_tokens: theme::live::LiveTokens::from_env(),
         };
@@ -726,20 +748,22 @@ impl PhotocraftApp {
     /// first, capped at Preferences › File Handling › Recent File List Contains. The list lives in
     /// the preferences (`fileHandling.recentFiles`), so it survives a restart; `ui.recent_files`
     /// mirrors it for the menus and the Home screen.
+    /// The file is dated as just opened, so Home lists it first.
     pub fn push_recent(&mut self, path: &str) {
-        let cap = self.recent_cap();
-        let mut r = self.session.prefs().file_handling.recent_files.clone();
-        r.retain(|p| p != path);
-        r.insert(0, path.to_string());
-        r.truncate(cap);
-        self.ui.recent_files = r.clone();
-        self.session.prefs.edit(|p| p.file_handling.recent_files = r);
+        self.note_recent(path, photocraft_engine::home_cmds::Stamp::Opened);
+    }
+
+    /// [`push_recent`](Self::push_recent) with how to date the file (a save dates only a file
+    /// with no open time yet).
+    pub(crate) fn note_recent(&mut self, path: &str, stamp: photocraft_engine::home_cmds::Stamp) {
+        photocraft_engine::home_cmds::note_recent(&mut self.session, path, stamp, photocraft_engine::home_cmds::unix_now());
+        self.ui.recent_files = self.session.prefs().file_handling.recent_files.clone();
     }
 
     /// File › Open Recent › Clear Recent File List.
     pub fn clear_recent(&mut self) {
         self.ui.recent_files.clear();
-        self.session.prefs.edit(|p| p.file_handling.recent_files.clear());
+        photocraft_engine::home_cmds::clear_recent(&mut self.session);
     }
 
     /// How many recent files to remember ("Recent File List Contains", 0–100).
@@ -832,14 +856,26 @@ impl PhotocraftApp {
 
     /// File › Open: native platforms return all selected paths; the web delivers its pick through
     /// the single-file service/inbox instead.
+    /// The dialog starts in the Resources path of the folder shown on Home or of the active
+    /// document's folder, else in the active document's directory or the last folder a file was
+    /// opened from (see [`Self::dialog_dir`]). Files opened from a folder shown on Home belong
+    /// to that folder.
     pub fn open_dialog_file(&mut self) {
+        let dir = self.dialog_dir(photocraft_engine::home_cmds::DirKind::Resources);
+        let folder = home_ui::shown_folder(self);
         if let Some(pick_paths) = self.services.pick_open_paths.as_mut() {
-            if let Some(paths) = pick_paths() {
+            if let Some(paths) = pick_paths(dir.as_deref()) {
+                if let Some(id) = folder {
+                    home_ui::open_into(self, &paths, &id);
+                }
                 self.open_paths(&paths);
             }
             return;
         }
-        let Some((path, bytes)) = self.services.pick_open.as_mut().and_then(|f| f()) else { return };
+        let Some((path, bytes)) = self.services.pick_open.as_mut().and_then(|f| f(dir.as_deref())) else { return };
+        if let Some(id) = folder {
+            home_ui::open_into(self, std::slice::from_ref(&path), &id);
+        }
         if let Err(e) = bytes.and_then(|bytes| self.open_file(&path, &bytes)) {
             self.open_failed(&file_open::display_name(&path), &e);
         }
@@ -848,8 +884,30 @@ impl PhotocraftApp {
     /// Show the open dialog for a file a command reads (a script, notes, a placed image, presets):
     /// `None` when cancelled, else its name and bytes or the read error.
     pub(crate) fn pick_file_bytes(&mut self) -> Option<Result<(String, Vec<u8>), String>> {
-        let (name, bytes) = self.services.pick_open.as_mut().and_then(|f| f())?;
+        self.pick_file_bytes_in(None)
+    }
+
+    /// [`Self::pick_file_bytes`] starting in `dir` (File › Place starts in the Resources path).
+    pub(crate) fn pick_file_bytes_in(&mut self, dir: Option<&str>) -> Option<Result<(String, Vec<u8>), String>> {
+        let (name, bytes) = self.services.pick_open.as_mut().and_then(|f| f(dir))?;
         Some(bytes.map(|b| (name.clone(), b)).map_err(|e| format!("{}: {e}", file_open::display_name(&name))))
+    }
+
+    /// Where a file dialog of `kind` starts: the folder shown on Home, else the active document's
+    /// Home folder, else its own directory, else the last folder a file was opened from
+    /// (`home.defaultDir`). `None` leaves it to the system.
+    pub(crate) fn dialog_dir(&self, kind: photocraft_engine::home_cmds::DirKind) -> Option<String> {
+        let folder = home_ui::shown_folder(self);
+        photocraft_engine::home_cmds::default_dir(&self.session, kind, folder.as_deref())
+    }
+
+    /// A save dialog's suggestion: `name` in the directory a `kind` dialog starts in, or the bare
+    /// name when there is none.
+    pub(crate) fn suggest_in(&self, kind: photocraft_engine::home_cmds::DirKind, name: &str) -> String {
+        match self.dialog_dir(kind) {
+            Some(dir) => std::path::Path::new(&dir).join(name).to_string_lossy().into_owned(),
+            None => name.to_string(),
+        }
     }
 
     /// Save the active document to `path` (or a path chosen in the save dialog); returns the path
@@ -870,6 +928,8 @@ impl PhotocraftApp {
             Some(p) if writable => p.clone(),
             p => std::path::Path::new(p.as_deref().unwrap_or(&st.doc.name)).with_extension("psd").to_string_lossy().into_owned(),
         };
+        // In the document's Home folder (its Projects path), else where it is (see `dialog_dir`).
+        let suggested = self.suggest_in(photocraft_engine::home_cmds::DirKind::Projects, &file_open::display_name(&suggested));
         let path = match path {
             Some(p) => p,
             None => self.services.pick_save.as_mut().and_then(|f| f(&suggested)).ok_or("cancelled")?,
@@ -894,6 +954,11 @@ impl PhotocraftApp {
         if let Some(st) = self.session.active_mut() {
             st.path = Some(path.clone());
             st.saved_revision = st.revision;
+        }
+        // Home: the saved file is a recent one, with a fresh thumbnail.
+        self.note_recent(&path, photocraft_engine::home_cmds::Stamp::Saved);
+        if let Some(i) = self.session.active_index() {
+            home_ui::queue_document_thumbnail(self, i);
         }
         self.ui.status = format!("Saved {path}");
         // "Save Document" script events and File › Generate › Image Assets.
@@ -1102,10 +1167,12 @@ impl eframe::App for PhotocraftApp {
         if chrome && self.ui.panels.status_bar {
             panels::status_bar(self, ui);
         }
-        if chrome && self.ui.panels.toolbar {
+        // Home covers the window under the menus and options bar, like Photoshop's.
+        let home = home_ui::shown(self);
+        if chrome && self.ui.panels.toolbar && !home {
             panels::toolbar(self, ui);
         }
-        if chrome {
+        if chrome && !home {
             panels::right_dock(self, ui);
         }
         let t = theme::Tokens::get(&ctx);

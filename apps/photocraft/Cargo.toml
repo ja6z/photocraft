@@ -38,6 +38,8 @@ log = { workspace = true }
 rfd = { workspace = true }
 arboard = { version = "3.6", features = ["wayland-data-control"] }
 open = "5"
+# Home's "today at 14:05": the local time zone's offset (already in Cargo.lock through rmcp).
+chrono = { version = "=0.4.45", default-features = false, features = ["clock"] }
 # Reads the saved window layout (eframe persistence) to drop values that would abort startup.
 ron = "0.12"
 

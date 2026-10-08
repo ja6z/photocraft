@@ -831,7 +831,8 @@ fn front(app: &mut PhotocraftApp, id: &str, params: &Value) -> Option<Result<Val
         }
         "file.saveACopy" => Some(save_a_copy(app)),
         "file.placeEmbedded" | "file.placeLinked" => {
-            let (name, bytes) = match app.pick_file_bytes()? {
+            let dir = app.dialog_dir(photocraft_engine::home_cmds::DirKind::Resources);
+            let (name, bytes) = match app.pick_file_bytes_in(dir.as_deref())? {
                 Ok(picked) => picked,
                 Err(e) => return Some(Err(e)),
             };
@@ -1009,7 +1010,7 @@ fn front(app: &mut PhotocraftApp, id: &str, params: &Value) -> Option<Result<Val
 fn save_a_copy(app: &mut PhotocraftApp) -> Result<Value, String> {
     let st = app.session.active().ok_or("no document")?;
     let stem = st.doc.name.rsplit_once('.').map_or(st.doc.name.as_str(), |(a, _)| a).to_string();
-    let suggested = format!("{stem} copy.psd");
+    let suggested = app.suggest_in(photocraft_engine::home_cmds::DirKind::Projects, &format!("{stem} copy.psd"));
     let path = app.services.pick_save.as_mut().and_then(|f| f(&suggested)).ok_or("cancelled")?;
     let export = app.services.export.as_ref().ok_or("no exporter configured")?;
     let doc = app.session.active().ok_or("no document")?.doc.clone();

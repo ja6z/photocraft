@@ -2416,3 +2416,65 @@ cameraRaw	Roughness	Неровность
 	Lines +/−	Строки +/−
 	@{login}: {prs} PRs, {commits} commits, +{added} / −{deleted} lines (Δ {delta}), +{binAdded} / −{binDeleted} binary assets, {first} – {last}	@{login}: PR: {prs}, коммиты: {commits}, строки +{added} / −{deleted} (Δ {delta}), двоичные файлы +{binAdded} / −{binDeleted}, {first} – {last}
 	Apply At Canvas Bounds	Применить эффект на границах холста
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Показать в Finder
+	Show in Explorer	Показать в Проводнике
+	Show in Folder	Показать в папке
+	Folders	Папки
+	New Folder…	Новая папка…
+	New Folder	Новая папка
+	Rename Folder	Переименовать папку
+	Folder Paths	Пути папки
+	Folder Paths…	Пути папки…
+	Folders keep a project's files together and set where they're saved.	Папки собирают файлы проекта вместе и задают, куда они сохраняются.
+	This folder isn't on disk any more.	Этой папки больше нет на диске.
+	Remove from Home	Убрать с главной
+homePage	Home	Главная
+	Presets or a custom size	Наборы или свой размер
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG и другие
+	Recently opened	Недавно открытые
+	No recent files yet	Пока нет недавних файлов
+	Files you open or save show up here, newest first.	Файлы, которые вы открываете или сохраняете, появятся здесь, сначала новые.
+	New Document Here…	Новый документ здесь…
+	Projects	Проекты
+	Exports	Экспорт
+	Resources	Ресурсы
+	same as Projects	как Проекты
+	Click to choose another folder.	Нажмите, чтобы выбрать другую папку.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Этой папки больше нет на диске. Укажите, где она теперь, в поле «Проекты» выше.
+	Files	Файлы
+	This folder is empty	Эта папка пуста
+	Save a document here, or add files to it from Recent.	Сохраните сюда документ или добавьте файлы из недавних.
+	Showing files in the file manager isn't available here.	Показ файлов в файловом менеджере здесь недоступен.
+	Added {name} to the folder.	Файл {name} добавлен в папку.
+	{name} isn't there any more: it was moved, renamed or deleted.	Файла {name} там больше нет: его переместили, переименовали или удалили.
+@plural	{n} file|{n} files	{n} файл|{n} файла|{n} файлов
+	Opened just now	Открыт только что
+	Modified just now	Изменён только что
+	Opened {n} min ago	Открыт {n} мин назад
+	Modified {n} min ago	Изменён {n} мин назад
+	Opened today at {time}	Открыт сегодня в {time}
+	Modified today at {time}	Изменён сегодня в {time}
+	Opened yesterday at {time}	Открыт вчера в {time}
+	Modified yesterday at {time}	Изменён вчера в {time}
+	Opened {date}	Открыт {date}
+	Modified {date}	Изменён {date}
+homeBadge	Open	Открыт
+	File missing	Файл не найден
+	Remove {name} from Recent	Убрать {name} из недавних
+	Remove from Recent	Убрать из недавних
+	Add to Folder	Добавить в папку
+	Remove from Folder	Убрать из папки
+	Folder name	Имя папки
+	No folder chosen	Папка не выбрана
+	For example: Flyers 2026	Например: Флаеры 2026
+	Change…	Изменить…
+	Create a new folder in:	Создать новую папку в:
+	Use an existing folder:	Использовать существующую папку:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft никогда не перемещает и не удаляет ваши файлы. Если убрать папку с главной, она просто исчезнет из списка.
+	Save As and Save a Copy start here (.psd, .pcraft).	«Сохранить как» и «Сохранить копию» открываются здесь (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	«Экспортировать как», быстрый экспорт и «Сохранить для Web» открываются здесь (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	«Открыть» и «Поместить» открываются здесь: фото, логотипы и другие материалы.
+	Same as Projects until you choose one.	Как «Проекты», пока вы не выберете другую.
+	New document…	Новый документ…

@@ -2213,3 +2213,66 @@ cameraRaw	Amount	Cantidad
 	Lines +/−	Líneas +/−
 	@{login}: {prs} PRs, {commits} commits, +{added} / −{deleted} lines (Δ {delta}), +{binAdded} / −{binDeleted} binary assets, {first} – {last}	@{login}: {prs} PR, {commits} commits, +{added} / −{deleted} líneas (Δ {delta}), +{binAdded} / −{binDeleted} archivos binarios, {first} – {last}
 	Apply At Canvas Bounds	Aplicar efecto en los límites del lienzo
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Mostrar en Finder
+	Show in Explorer	Mostrar en el Explorador
+	Show in Folder	Mostrar en la carpeta
+	Folders	Carpetas
+	New Folder…	Nueva carpeta…
+	New Folder	Nueva carpeta
+	Rename Folder	Cambiar nombre de la carpeta
+	Folder Paths	Rutas de la carpeta
+	Folder Paths…	Rutas de la carpeta…
+	Folders keep a project's files together and set where they're saved.	Las carpetas reúnen los archivos de un proyecto y definen dónde se guardan.
+	This folder isn't on disk any more.	Esta carpeta ya no está en el disco.
+	Remove from Home	Quitar de Inicio
+homePage	Home	Inicio
+	Presets or a custom size	Preajustes o tamaño personalizado
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG y más
+	Recently opened	Abiertos recientemente
+	No recent files yet	Aún no hay archivos recientes
+	Files you open or save show up here, newest first.	Los archivos que abra o guarde aparecerán aquí, primero los más recientes.
+	New Document Here…	Nuevo documento aquí…
+	Projects	Proyectos
+	Exports	Exportaciones
+	Resources	Recursos
+	same as Projects	igual que Proyectos
+	Click to choose another folder.	Haga clic para elegir otra carpeta.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Esta carpeta ya no está en el disco. Indique dónde está ahora con Proyectos, arriba.
+	Files	Archivos
+	This folder is empty	Esta carpeta está vacía
+	Save a document here, or add files to it from Recent.	Guarde aquí un documento o añada archivos desde Recientes.
+	Showing files in the file manager isn't available here.	Aquí no se pueden mostrar archivos en el gestor de archivos.
+	Added {name} to the folder.	Se añadió {name} a la carpeta.
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} ya no está ahí: se movió, se cambió de nombre o se eliminó.
+@plural	{n} file|{n} files	{n} archivo|{n} archivos
+	Opened just now	Abierto hace un momento
+	Modified just now	Modificado hace un momento
+	Opened {n} min ago	Abierto hace {n} min
+	Modified {n} min ago	Modificado hace {n} min
+	Opened today at {time}	Abierto hoy a las {time}
+	Modified today at {time}	Modificado hoy a las {time}
+	Opened yesterday at {time}	Abierto ayer a las {time}
+	Modified yesterday at {time}	Modificado ayer a las {time}
+	Opened {date}	Abierto el {date}
+	Modified {date}	Modificado el {date}
+homeBadge	Open	Abierto
+	File missing	Archivo no encontrado
+	Remove {name} from Recent	Quitar {name} de Recientes
+	Remove from Recent	Quitar de Recientes
+	Add to Folder	Añadir a carpeta
+	Remove from Folder	Quitar de la carpeta
+	Folder name	Nombre de la carpeta
+	No folder chosen	Ninguna carpeta elegida
+	For example: Flyers 2026	Por ejemplo: Flyers 2026
+	Change…	Cambiar…
+	Choose…	Elegir…
+	Create a new folder in:	Crear una carpeta nueva en:
+	Use an existing folder:	Vincular una carpeta existente:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft nunca mueve ni elimina sus archivos. Quitar una carpeta de Inicio solo la saca de la lista.
+	Save As and Save a Copy start here (.psd, .pcraft).	Guardar como y Guardar una copia empiezan aquí (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	Exportar como, Exportación rápida y Guardar para Web empiezan aquí (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	Abrir y Colocar empiezan aquí: fotos, logotipos y otros materiales.
+	Same as Projects until you choose one.	Igual que Proyectos hasta que elija una.
+	Reset	Restablecer

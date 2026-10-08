@@ -3502,6 +3502,7 @@ name = "photocraft"
 version = "0.5.0"
 dependencies = [
  "arboard",
+ "chrono",
  "eframe",
  "egui",
  "fmv-macos-events",

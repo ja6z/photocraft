@@ -118,7 +118,7 @@ pub fn show(app: &mut PhotocraftApp, ctx: &egui::Context) {
             } else {
                 440.0
             }));
-            if let Some(w) = crate::file_ui::dialog_width(&d.fields) {
+            if let Some(w) = crate::file_ui::dialog_width(&d.fields).or_else(|| crate::home_dialogs::dialog_width(&d.fields)) {
                 ui.set_min_width(w);
                 ui.set_max_width(w);
             }
@@ -186,6 +186,7 @@ pub fn show(app: &mut PhotocraftApp, ctx: &egui::Context) {
                 }
                 DialogKind::Command if crate::color_range_ui::owns(&fields) => crate::color_range_ui::body(app, ui, &mut fields),
                 DialogKind::Command if crate::prefs_ui::owns(&fields) => crate::prefs_ui::body(app, ui, &mut fields),
+                DialogKind::Command if crate::home_dialogs::owns(&fields) => crate::home_dialogs::body(app, ui, &mut fields),
                 DialogKind::Command if fields.contains_key("__export") => crate::export_dialog::body(app, ui, &mut fields),
                 DialogKind::Command if fields.contains_key("__sizing") => crate::sizing::body(ui, &mut fields),
                 DialogKind::Command if crate::adjust_dialog::owns(&fields) => crate::adjust_dialog::body(app, ui, &mut fields),
@@ -223,9 +224,11 @@ pub fn show(app: &mut PhotocraftApp, ctx: &egui::Context) {
                         } else if d.fields.contains_key("__export") {
                             tl!("Export")
                         } else {
-                            crate::file_ui::ok_label(&d.fields).unwrap_or(tl!("OK"))
+                            crate::file_ui::ok_label(&d.fields).or_else(|| crate::home_dialogs::ok_label(&d.fields)).unwrap_or(tl!("OK"))
                         };
-                        let ok = DialogButton::new(ButtonRole::Default, ok_label, 84.0);
+                        // Home's dialogs keep OK off until their fields make sense (a folder needs a name).
+                        let ok_enabled = !crate::home_dialogs::owns(&fields) || crate::home_dialogs::ok_enabled(&fields);
+                        let ok = DialogButton::new(ButtonRole::Default, ok_label, 84.0).enabled(ok_enabled);
                         let cancel = DialogButton::new(ButtonRole::Cancel, if d.kind == DialogKind::NewDocument { tl!("Close") } else { tl!("Cancel") }, 84.0);
                         let clicked = if d.kind == DialogKind::Command && crate::prefs_ui::is_preferences(&fields) {
                             let changed = crate::prefs_ui::preferences_changed(app, &fields);
@@ -237,7 +240,7 @@ pub fn show(app: &mut PhotocraftApp, ctx: &egui::Context) {
                             Some(ButtonRole::Cancel) => outcome = Some(false),
                             Some(ButtonRole::Apply) => apply_requested = true,
                             Some(_) => outcome = Some(true),
-                            None if ui.input(|i| i.key_pressed(egui::Key::Enter)) => outcome = Some(true),
+                            None if ok_enabled && ui.input(|i| i.key_pressed(egui::Key::Enter)) => outcome = Some(true),
                             None => {}
                         }
                     }
@@ -328,6 +331,13 @@ pub fn confirm(app: &mut PhotocraftApp, id: u64) -> Result<Value, String> {
             if let Some(i) = app.session.active_index() {
                 app.ui.views[i].fit_pending = true;
             }
+            // New Document Here… on a Home folder: the document belongs to it (Save As starts there).
+            if r.is_ok()
+                && let Some(folder) = d.fields.get("__homeFolder").and_then(Value::as_str)
+                && let Err(e) = app.run("home.setDocumentFolder", json!({"folder": folder}))
+            {
+                log::debug!("home: {e}");
+            }
             r
         }
         DialogKind::Command if crate::fill_ui::owns(&d.fields) => crate::fill_ui::confirm(app, &d.fields),
@@ -337,6 +347,7 @@ pub fn confirm(app: &mut PhotocraftApp, id: u64) -> Result<Value, String> {
         DialogKind::Command if crate::color_picker_ui::owns(&d.fields) => crate::color_picker_ui::confirm(app, &d.fields),
         DialogKind::Command if crate::color_range_ui::owns(&d.fields) => crate::color_range_ui::confirm(app, &d.fields),
         DialogKind::Command if crate::prefs_ui::owns(&d.fields) => crate::prefs_ui::confirm(app, &d.fields),
+        DialogKind::Command if crate::home_dialogs::owns(&d.fields) => crate::home_dialogs::confirm(app, &d.fields),
         DialogKind::Command if d.fields.contains_key("__export") => crate::export_dialog::confirm(app, &d.fields),
         DialogKind::Command => {
             app.filter_preview = None;

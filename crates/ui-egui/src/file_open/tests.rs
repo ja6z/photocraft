@@ -29,7 +29,7 @@ fn app_with(pick_open: Option<(String, Vec<u8>)>, pick_save: Option<String>) -> 
             let warnings = if path.ends_with(".png") { vec!["Layers were flattened".to_string()] } else { Vec::new() };
             Ok((b"out".to_vec(), warnings))
         })),
-        pick_open: Some(Box::new(move || pick_open.take().map(|(name, bytes)| (name, Ok(bytes))))),
+        pick_open: Some(Box::new(move |_: Option<&str>| pick_open.take().map(|(name, bytes)| (name, Ok(bytes))))),
         pick_save: Some(Box::new(move |_s: &str| pick_save.clone())),
         write: Some(Box::new(move |p: &str, b: &[u8]| {
             w.borrow_mut().push((p.to_string(), b.to_vec()));
@@ -88,7 +88,7 @@ fn file_open_dialog_opens_every_selected_path() {
     });
     let (mut app, _) = app_with(None, None);
     let selected = paths.to_vec();
-    app.services.pick_open_paths = Some(Box::new(move || Some(selected.clone())));
+    app.services.pick_open_paths = Some(Box::new(move |_: Option<&str>| Some(selected.clone())));
 
     menus::invoke(&mut app, &egui::Context::default(), "file.open", json!({})).unwrap();
 
@@ -104,7 +104,7 @@ fn file_open_dialog_opens_every_selected_path() {
 #[test]
 fn cancelling_multi_file_open_does_not_fall_back_to_single_file_picker() {
     let (mut app, _) = app_with(Some(("/pics/unexpected.psd".into(), b"x".to_vec())), None);
-    app.services.pick_open_paths = Some(Box::new(|| None));
+    app.services.pick_open_paths = Some(Box::new(|_: Option<&str>| None));
 
     menus::invoke(&mut app, &egui::Context::default(), "file.open", json!({})).unwrap();
 
@@ -200,16 +200,16 @@ fn open_failures_are_errors_and_leave_no_document() {
 fn a_picked_file_that_cannot_be_read_is_reported_like_any_open_failure() {
     let (mut app, _) = app_with(None, None);
     let mut picked = Some(("C:/photos/big.psb".to_string(), Err("The parameter is incorrect. (os error 87)".to_string())));
-    app.services.pick_open = Some(Box::new(move || picked.take()));
+    app.services.pick_open = Some(Box::new(move |_: Option<&str>| picked.take()));
     app.open_dialog_file();
     assert!(app.session.documents().is_empty());
     assert!(app.ui.status_error);
     let notice = app.ui.notices.last().unwrap();
     assert!(notice.error && notice.title.contains("Couldn't open big.psb: The parameter is incorrect"), "{}", notice.title);
     // Commands that read a picked file (scripts, notes, Place) get the same message as an error.
-    app.services.pick_open = Some(Box::new(|| Some(("C:/photos/big.psb".to_string(), Err("denied".to_string())))));
+    app.services.pick_open = Some(Box::new(|_: Option<&str>| Some(("C:/photos/big.psb".to_string(), Err("denied".to_string())))));
     assert_eq!(app.pick_file_bytes(), Some(Err("big.psb: denied".to_string())));
-    app.services.pick_open = Some(Box::new(|| None));
+    app.services.pick_open = Some(Box::new(|_: Option<&str>| None));
     assert_eq!(app.pick_file_bytes(), None, "cancelled");
 }
 

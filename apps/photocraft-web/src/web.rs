@@ -152,7 +152,8 @@ fn services(inbox: Inbox, ctx: egui::Context) -> Services {
             opts.xmp = if settings.xmp_all { photocraft_io::XmpEmbed::All } else { photocraft_io::XmpEmbed::None };
             photocraft_io::export(doc, path, &opts).map(|r| (r.bytes, r.warnings)).map_err(|e| e.to_string())
         })),
-        pick_open: Some(Box::new(move || {
+        // Browsers don't let a page choose where the picker starts.
+        pick_open: Some(Box::new(move |_dir: Option<&str>| {
             let inbox = open_inbox.clone();
             let ctx = ctx.clone();
             wasm_bindgen_futures::spawn_local(async move {

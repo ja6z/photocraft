@@ -131,6 +131,60 @@ fn image_from_files(paths: &[PathBuf]) -> Option<(u32, u32, Vec<u8>)> {
     })
 }
 
+/// `d` starting in `dir` when that is a directory (Home folders, the active document's folder;
+/// see `PhotocraftApp::dialog_dir`); otherwise where the system puts it.
+fn start_in(d: rfd::FileDialog, dir: Option<&str>) -> rfd::FileDialog {
+    match dir.map(Path::new).filter(|p| p.is_dir()) {
+        Some(p) => d.set_directory(p),
+        None => d,
+    }
+}
+
+/// The directory a save dialog for `suggested` starts in: its directory part, when it has one
+/// that exists.
+fn save_dir(suggested: &str) -> Option<&Path> {
+    Path::new(suggested).parent().filter(|d| !d.as_os_str().is_empty() && d.is_dir())
+}
+
+/// Show `path` in the system file manager: a folder opens, a file is selected in its folder.
+fn reveal(path: &str) -> Result<(), String> {
+    let p = Path::new(path);
+    if !p.exists() {
+        return Err(format!("{path} doesn't exist"));
+    }
+    if p.is_dir() {
+        return open::that_detached(p).map_err(|e| e.to_string());
+    }
+    #[cfg(target_os = "macos")]
+    {
+        spawn_reaped(std::process::Command::new("open").arg("-R").arg(p))
+    }
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        spawn_reaped(std::process::Command::new("explorer").raw_arg(format!("/select,\"{path}\"")))
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        let dir = p.parent().ok_or_else(|| format!("{path} has no folder"))?;
+        open::that_detached(dir).map_err(|e| e.to_string())
+    }
+}
+
+/// Start `cmd` and reap it in the background, so it doesn't linger as a zombie.
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+fn spawn_reaped(cmd: &mut std::process::Command) -> Result<(), String> {
+    let mut child = cmd.spawn().map_err(|e| e.to_string())?;
+    std::thread::spawn(move || child.wait());
+    Ok(())
+}
+
+/// The local time zone's offset from UTC at `unix` (Home's "today at 14:05").
+fn local_offset(unix: i64) -> i32 {
+    use chrono::TimeZone;
+    chrono::Local.timestamp_opt(unix, 0).single().map(|d| d.offset().local_minus_utc()).unwrap_or(0)
+}
+
 pub fn native(automation: Option<photocraft_automation::AuthorizedWorkspace>) -> Services {
     let clip: Rc<RefCell<Option<arboard::Clipboard>>> = Rc::default();
     let automation_read = automation.clone().map(|workspace| {
@@ -167,14 +221,14 @@ pub fn native(automation: Option<photocraft_automation::AuthorizedWorkspace>) ->
             opts.xmp = if settings.xmp_all { photocraft_io::XmpEmbed::All } else { photocraft_io::XmpEmbed::None };
             crate::crash_guard::guard("Export", || photocraft_io::export(doc, path, &opts).map(|r| (r.bytes, r.warnings)).map_err(|e| e.to_string()))
         })),
-        pick_open: Some(Box::new(|| {
-            let path = rfd::FileDialog::new().add_filter("All Formats", OPEN_EXTS).add_filter("PhotoCraft", &["pcraft"]).pick_file()?;
+        pick_open: Some(Box::new(|dir: Option<&str>| {
+            let path = start_in(rfd::FileDialog::new(), dir).add_filter("All Formats", OPEN_EXTS).add_filter("PhotoCraft", &["pcraft"]).pick_file()?;
             // A read failure goes back to the app, which reports it like any other open failure.
             let bytes = photocraft_format::read_file(&path).map_err(|e| e.to_string());
             Some((path.to_string_lossy().to_string(), bytes))
         })),
-        pick_open_paths: Some(Box::new(|| {
-            rfd::FileDialog::new()
+        pick_open_paths: Some(Box::new(|dir: Option<&str>| {
+            start_in(rfd::FileDialog::new(), dir)
                 .add_filter("All Formats", OPEN_EXTS)
                 .add_filter("PhotoCraft", &["pcraft"])
                 .pick_files()
@@ -189,8 +243,15 @@ pub fn native(automation: Option<photocraft_automation::AuthorizedWorkspace>) ->
             if let Some(name) = p.file_name() {
                 d = d.set_file_name(name.to_string_lossy());
             }
+            // A suggestion with a folder (the document's, a Home folder's) starts there.
+            if let Some(dir) = save_dir(suggested) {
+                d = d.set_directory(dir);
+            }
             Some(d.save_file()?.to_string_lossy().to_string())
         })),
+        pick_folder: Some(Box::new(|dir: Option<&str>| start_in(rfd::FileDialog::new(), dir).pick_folder().map(|p| p.to_string_lossy().into_owned()))),
+        reveal: Some(Box::new(reveal)),
+        local_offset: Some(local_offset),
         write: Some(Box::new(|path: &str, bytes: &[u8]| write_atomic(Path::new(path), bytes))),
         automation_read,
         automation_write,
@@ -315,6 +376,26 @@ mod tests {
     use photocraft_format::list_recovery;
     use photocraft_ui_egui::{PhotocraftApp, prefs_ui};
     use serde_json::{Value, json};
+
+    /// Save dialogs start in the suggestion's folder when it has one that exists (Home folders,
+    /// the document's own folder); a bare name or a missing folder leaves it to the system.
+    #[test]
+    fn save_dialogs_start_in_the_suggested_folder() {
+        let dir = std::env::temp_dir().join(format!("pc-save-dir-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let suggested = dir.join("Flyer.psd").to_string_lossy().into_owned();
+        assert_eq!(save_dir(&suggested), Some(dir.as_path()));
+        assert_eq!(save_dir("Flyer.psd"), None);
+        assert_eq!(save_dir(&dir.join("missing/Flyer.psd").to_string_lossy()), None);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn local_offset_is_a_sane_time_zone() {
+        // Somewhere between UTC-12 and UTC+14, on any machine.
+        let off = local_offset(1_791_417_600);
+        assert!((-12 * 3600..=14 * 3600).contains(&off), "{off}");
+    }
 
     /// Tests every native save dialog and records the suggested file name. Each name's file type must come first
     /// in the save panel, or the panel appends the first type's extension (`photo.webp.psd`, `photo.gif.psd`).

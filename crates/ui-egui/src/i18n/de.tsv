@@ -2181,3 +2181,66 @@
 	Lines +/−	Zeilen +/−
 	@{login}: {prs} PRs, {commits} commits, +{added} / −{deleted} lines (Δ {delta}), +{binAdded} / −{binDeleted} binary assets, {first} – {last}	@{login}: {prs} PRs, {commits} Commits, +{added} / −{deleted} Zeilen (Δ {delta}), +{binAdded} / −{binDeleted} Binärdateien, {first} – {last}
 	Apply At Canvas Bounds	Effekt an Arbeitsflächenbegrenzungen anwenden
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Im Finder zeigen
+	Show in Explorer	Im Explorer zeigen
+	Show in Folder	Im Ordner zeigen
+	Folders	Ordner
+	New Folder…	Neuer Ordner…
+	New Folder	Neuer Ordner
+	Rename Folder	Ordner umbenennen
+	Folder Paths	Ordnerpfade
+	Folder Paths…	Ordnerpfade…
+	Folders keep a project's files together and set where they're saved.	Ordner halten die Dateien eines Projekts zusammen und legen fest, wo sie gespeichert werden.
+	This folder isn't on disk any more.	Dieser Ordner ist nicht mehr auf dem Datenträger.
+	Remove from Home	Von der Startseite entfernen
+homePage	Home	Start
+	Presets or a custom size	Vorgaben oder eigene Größe
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG und mehr
+	Recently opened	Zuletzt geöffnet
+	No recent files yet	Noch keine zuletzt geöffneten Dateien
+	Files you open or save show up here, newest first.	Dateien, die Sie öffnen oder speichern, erscheinen hier, die neuesten zuerst.
+	New Document Here…	Neues Dokument hier…
+	Projects	Projekte
+	Exports	Exporte
+	Resources	Ressourcen
+	same as Projects	wie Projekte
+	Click to choose another folder.	Klicken, um einen anderen Ordner zu wählen.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Dieser Ordner ist nicht mehr auf dem Datenträger. Wählen Sie oben unter Projekte, wo er jetzt ist.
+	Files	Dateien
+	This folder is empty	Dieser Ordner ist leer
+	Save a document here, or add files to it from Recent.	Speichern Sie hier ein Dokument oder fügen Sie Dateien aus „Zuletzt geöffnet“ hinzu.
+	Showing files in the file manager isn't available here.	Dateien im Dateimanager zeigen ist hier nicht verfügbar.
+	Added {name} to the folder.	{name} wurde zum Ordner hinzugefügt.
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} ist nicht mehr da: Die Datei wurde verschoben, umbenannt oder gelöscht.
+@plural	{n} file|{n} files	{n} Datei|{n} Dateien
+	Opened just now	Gerade eben geöffnet
+	Modified just now	Gerade eben geändert
+	Opened {n} min ago	Vor {n} Min. geöffnet
+	Modified {n} min ago	Vor {n} Min. geändert
+	Opened today at {time}	Heute um {time} geöffnet
+	Modified today at {time}	Heute um {time} geändert
+	Opened yesterday at {time}	Gestern um {time} geöffnet
+	Modified yesterday at {time}	Gestern um {time} geändert
+	Opened {date}	Geöffnet am {date}
+	Modified {date}	Geändert am {date}
+homeBadge	Open	Geöffnet
+	File missing	Datei fehlt
+	Remove {name} from Recent	{name} aus „Zuletzt geöffnet“ entfernen
+	Remove from Recent	Aus „Zuletzt geöffnet“ entfernen
+	Add to Folder	Zu Ordner hinzufügen
+	Remove from Folder	Aus dem Ordner entfernen
+	Folder name	Ordnername
+	No folder chosen	Kein Ordner gewählt
+	For example: Flyers 2026	Zum Beispiel: Flyer 2026
+	Change…	Ändern…
+	Choose…	Auswählen…
+	Create a new folder in:	Neuen Ordner erstellen in:
+	Use an existing folder:	Vorhandenen Ordner verwenden:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft verschiebt oder löscht Ihre Dateien nie. Ein Ordner, den Sie von der Startseite entfernen, verschwindet nur aus der Liste.
+	Save As and Save a Copy start here (.psd, .pcraft).	„Speichern unter“ und „Kopie speichern“ beginnen hier (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	„Exportieren als“, Schnellexport und „Für Web speichern“ beginnen hier (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	Öffnen und Platzieren beginnen hier: Fotos, Logos und anderes Material.
+	Same as Projects until you choose one.	Wie Projekte, bis Sie einen wählen.
+	Reset	Zurücksetzen

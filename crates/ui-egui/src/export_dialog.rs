@@ -238,7 +238,8 @@ pub fn confirm(app: &mut PhotocraftApp, f: &Map<String, Value>) -> Result<Value,
     let doc = source_document(app, f)?;
     let stem = doc.name.rsplit_once('.').map_or(doc.name.as_str(), |(a, _)| a).to_string();
     let ext = s_fmt(f);
-    let suggested = format!("{stem}.{ext}");
+    // In the Exports path of the document's Home folder, else beside the document.
+    let suggested = app.suggest_in(photocraft_engine::home_cmds::DirKind::Exports, &format!("{stem}.{ext}"));
     let path = app.services.pick_save.as_mut().and_then(|p| p(&suggested)).ok_or("cancelled")?;
     let out = export_document(&doc, f, None)?;
     let export = app.services.export.as_ref().ok_or("no exporter configured")?;
@@ -265,7 +266,8 @@ pub fn quick_export_png(app: &mut PhotocraftApp) -> Result<Value, String> {
         } else {
             let st = app.session.active().ok_or("no document")?;
             let stem = st.doc.name.rsplit_once('.').map_or(st.doc.name.as_str(), |(a, _)| a).to_string();
-            let path = app.services.pick_save.as_mut().and_then(|p| p(&format!("{stem}.{fmt}"))).ok_or("cancelled")?;
+            let suggested = app.suggest_in(photocraft_engine::home_cmds::DirKind::Exports, &format!("{stem}.{fmt}"));
+            let path = app.services.pick_save.as_mut().and_then(|p| p(&suggested)).ok_or("cancelled")?;
             json!({"path": path})
         };
         let r = app.run("file.export.quickExport", p)?;
