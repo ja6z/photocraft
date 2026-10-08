@@ -180,6 +180,7 @@ pub fn authorize_engine_command(id: &str, params: &Value) -> Result<(), Automati
                 | "layer.videoLayers.reloadFrame"
         )
         || command_uses_ambient_path(id, params)
+        || home_command_uses_ambient_paths(id, params)
         || profile_command_may_read_ambient(id, params)
         || preferences_may_grant_ambient_paths(id, params)
         || params_contain_ambient_path(id, params)
@@ -253,7 +254,18 @@ fn preference_uses_ambient_filesystem(path: &str) -> bool {
     // The engine skips empty segments (`.scriptEvents.enabled` sets `scriptEvents.enabled`), so
     // judge the first non-empty one; no segment at all is the whole-preferences update.
     let Some(section) = path.split('.').find(|segment| !segment.is_empty()) else { return true };
-    matches!(section, "colorSettings" | "scriptEvents" | "historyLog" | "plugIns" | "scratchDisks")
+    matches!(section, "colorSettings" | "scriptEvents" | "historyLog" | "plugIns" | "scratchDisks" | "home")
+}
+
+/// Home folders are directories anywhere on disk: creating, linking, listing or re-pointing
+/// one, adding a file to one and moving the projects root all reach outside the automation
+/// roots. Reading the lists, forgetting entries and assigning documents to folders don't.
+fn home_command_uses_ambient_paths(id: &str, params: &Value) -> bool {
+    match id {
+        "home.folderNew" | "home.folderAdd" | "home.folderFiles" | "home.setProjectsRoot" => true,
+        "home.folderEdit" => ["path", "exports", "resources"].iter().any(|key| params.get(*key).is_some()),
+        _ => false,
+    }
 }
 
 fn command_uses_ambient_path(id: &str, params: &Value) -> bool {
@@ -528,6 +540,9 @@ mod tests {
             ".historyLog.filePath",
             "plugIns.additionalPluginsFolder",
             "scratchDisks.disks",
+            "home",
+            "home.folders",
+            "home.projectsRoot",
             ".",
             "..historyLog.filePath",
         ] {
@@ -537,6 +552,28 @@ mod tests {
             authorize_engine_command("prefs.set", &serde_json::json!({"values": {"interface.language": "fr", "historyLog.filePath": "/outside/log"}})).is_err()
         );
         assert!(authorize_engine_command("prefs.set", &serde_json::json!({"path": "interface.language", "value": "fr"})).is_ok());
+        // Home folders are directories anywhere on disk.
+        for (id, params) in [
+            ("home.folderNew", serde_json::json!({"name": "Flyers"})),
+            ("home.folderNew", serde_json::json!({"name": "Flyers", "path": "/outside/flyers"})),
+            ("home.folderAdd", serde_json::json!({"id": "flyers", "path": "/outside/a.png"})),
+            ("home.folderFiles", serde_json::json!({"id": "flyers"})),
+            ("home.folderEdit", serde_json::json!({"id": "flyers", "exports": "/outside/out"})),
+            ("home.folderEdit", serde_json::json!({"id": "flyers", "path": "/outside"})),
+            ("home.setProjectsRoot", serde_json::json!({"path": "/outside"})),
+        ] {
+            assert!(authorize_engine_command(id, &params).is_err(), "{id}: {params}");
+        }
+        for (id, params) in [
+            ("home.recent", serde_json::json!({})),
+            ("home.folders", serde_json::json!({})),
+            ("home.folderEdit", serde_json::json!({"id": "flyers", "name": "Flyers 2026"})),
+            ("home.folderDelete", serde_json::json!({"id": "flyers"})),
+            ("home.defaultDir", serde_json::json!({"kind": "exports"})),
+            ("home.setDocumentFolder", serde_json::json!({"folder": "flyers"})),
+        ] {
+            assert!(authorize_engine_command(id, &params).is_ok(), "{id}: {params}");
+        }
     }
 
     #[test]
@@ -568,6 +605,11 @@ mod tests {
 
     fn documents_filesystem_path_params(id: &str, params: &str) -> bool {
         if matches!(id, "prefs.get" | "prefs.reset") {
+            return false;
+        }
+        // Home lists paths in their results, and these take a recent entry or an added file as a
+        // key into Home's lists (forgetting one deletes only the app's own cached thumbnail).
+        if matches!(id, "home.recent" | "home.folders" | "home.forgetRecent" | "home.folderRemove" | "home.setDocumentFolder") {
             return false;
         }
         // These registry descriptions refer to document vector paths, not host files.
