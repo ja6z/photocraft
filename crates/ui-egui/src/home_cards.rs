@@ -28,6 +28,8 @@ pub(crate) const GAP: f32 = 20.0;
 const META_H: f32 = 50.0;
 /// Thumbnail textures decoded per frame (the rest come on the next frames).
 const LOADS_PER_FRAME: usize = 6;
+/// Thumbnail textures kept (about 0.5 MB each); the least recently drawn go first.
+const TEXTURES_KEPT: usize = 160;
 
 /// What a click on a card (or its menu) asks for.
 #[derive(Clone, Debug, PartialEq)]
@@ -81,8 +83,11 @@ struct Worker {
 /// Thumbnail textures and the worker that renders thumbnails.
 #[derive(Default)]
 pub(crate) struct Thumbs {
-    /// Texture of each thumbnail file (`None`: it couldn't be decoded).
-    textures: HashMap<String, Option<egui::TextureHandle>>,
+    /// Texture of each thumbnail file (`None`: it couldn't be decoded) and the frame it was
+    /// last drawn in.
+    textures: HashMap<String, (Option<egui::TextureHandle>, u64)>,
+    /// Frames on Home so far.
+    frame: u64,
     /// Files whose preview was asked for this session (asked once each).
     #[cfg(not(target_arch = "wasm32"))]
     requested: HashSet<String>,
@@ -101,6 +106,14 @@ impl Thumbs {
     /// Returns whether any finished (the listings then show the new files).
     pub(crate) fn poll(&mut self, ctx: &egui::Context) -> bool {
         self.loads = 0;
+        self.frame += 1;
+        // Keep the most recently drawn textures (a folder can list hundreds of files).
+        if self.textures.len() > TEXTURES_KEPT {
+            let mut ages: Vec<u64> = self.textures.values().map(|(_, f)| *f).collect();
+            ages.sort_unstable_by(|a, b| b.cmp(a));
+            let keep_from = ages.get(TEXTURES_KEPT - 1).copied().unwrap_or(0);
+            self.textures.retain(|_, (_, f)| *f >= keep_from);
+        }
         if let Ok(mut slot) = self.repaint.lock() {
             *slot = Some(ctx.clone());
         }
@@ -163,7 +176,9 @@ impl Thumbs {
 
     /// The texture of the thumbnail file `file`, decoding it if this frame's budget allows.
     fn texture(&mut self, ctx: &egui::Context, file: &str) -> Option<egui::TextureHandle> {
-        if let Some(t) = self.textures.get(file) {
+        let frame = self.frame;
+        if let Some((t, used)) = self.textures.get_mut(file) {
+            *used = frame;
             return t.clone();
         }
         if self.loads >= LOADS_PER_FRAME {
@@ -172,7 +187,7 @@ impl Thumbs {
         }
         self.loads += 1;
         let tex = decode_texture(ctx, file);
-        self.textures.insert(file.to_string(), tex.clone());
+        self.textures.insert(file.to_string(), (tex.clone(), frame));
         tex
     }
 }
@@ -345,9 +360,11 @@ fn card_ui(app: &mut PhotocraftApp, ui: &mut egui::Ui, card: Rect, r: &Value, li
     let resp = ui.interact(card, egui::Id::new(("home-card", &path, listing == Listing::Recent)), Sense::click());
     resp.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, true, &name));
     let resp = resp.on_hover_text(&path).on_hover_cursor(egui::CursorIcon::PointingHand);
-    if ui.is_rect_visible(card) {
-        app.home.cards.push(CardRect { path: path.clone(), name: name.clone(), rect: card });
+    // Cards scrolled out of view cost nothing (no texture, no preview request).
+    if !ui.is_rect_visible(card) {
+        return None;
     }
+    app.home.cards.push(CardRect { path: path.clone(), name: name.clone(), rect: card });
     let thumb = Rect::from_min_size(card.min, vec2(card.width(), thumb_h(card.width())));
     let painter = ui.painter_at(card.expand(3.0));
     let radius = t.radius_lg;
