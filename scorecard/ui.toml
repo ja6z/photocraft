@@ -22,9 +22,9 @@ note = "main.rs:46 native_options(): fixed 1440x900, centred on the main monitor
 [[item]]
 id = "UI-217-3"
 target = "File > Open starts in the last-used folder"
-status = "missing"
+status = "partial"
 issue = 217
-note = "services.rs:110 FileDialog::new() without set_directory"
+note = "lib.rs open_dialog_file passes home_cmds::default_dir(Resources) to the picker (services.rs start_in -> set_directory): the Home folder shown or the active document's folder, else the active document's directory, else the folder of the most recently opened file (home_ui_tests.rs file_dialogs_start_in_the_folder_paths). Not the folder last browsed when another document is active"
 
 [[item]]
 id = "UI-217-4"

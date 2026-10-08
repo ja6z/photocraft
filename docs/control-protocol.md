@@ -34,8 +34,8 @@ The transport is `apps/photocraft/src/control_server.rs`, and the handlers are i
 
 - `engine.execute {command, params}`: run any engine or UI command by id. Engine commands run directly with their default params and never open a dialog. Use `ui.menu.invoke` for menu-click behaviour, which opens a command's dialog when no params are given. `params` must be a JSON object (omit it or pass `null` for none); an array, string, number or boolean is an error naming the command, in every transport (control channel, `serve`, MCP and the CLI)
 - `engine.commands`: list commands with enablement
-- `ui.inspect`: full UI state (tool, panels, views, dialogs, windows, window size). The menu tree is not included; use `ui.menu.list`. `view` holds the View/Window/Type preferences: `screen_mode`, `extras`, `show` and `snap_to` flags, `flip_horizontal`, `arrange` (Window › Arrange layout), pixel aspect, font preview size, language options. `perf.timings.gpuInfo` holds the graphics adapter, backend, driver, the backend chosen at launch and why, the canvas renderer (`gpu`/`cpu`) and, after a device loss, `lost` (`help.systemInfo` returns the same as `info`)
-- `ui.set {tool?, panels?, dockTabs?, dock?, dockWidth?, colorPanel?, maskTarget?, vectorMaskTarget?, selectionMode?, zoom?, center?, fit?, theme?, brushSize?, brushSection?, brushTab?, brushesView?}`: change UI state; any other field is an error, checked before anything changes (`theme` is `pro`, `proMedium`, `studio`, `studioLight` or `classic`; `selectionMode` is the selection tools' options-bar mode, 0 New, 1 Add, 2 Subtract, 3 Intersect; `brushSection` indexes the Brush Settings sections, `brushTab` 0 = Brush Settings, 1 = Brushes; `dock` is `{order: ["layers", …], heights: {"properties": 180}, collapsed: ["color"]}`, the right-dock groups top to bottom, their heights in points and the groups collapsed to their tab strip; `dockWidth` sets the right dock width in points, clamped to 250..520; `colorPanel` is `{background}`, whether the Color panel edits the background colour)
+- `ui.inspect`: full UI state (tool, panels, views, dialogs, windows, window size). The menu tree is not included; use `ui.menu.list`. `view` holds the View/Window/Type preferences: `screen_mode`, `extras`, `show` and `snap_to` flags, `flip_horizontal`, `arrange` (Window › Arrange layout), pixel aspect, font preview size, language options. `perf.timings.gpuInfo` holds the graphics adapter, backend, driver, the backend chosen at launch and why, the canvas renderer (`gpu`/`cpu`) and, after a device loss, `lost` (`help.systemInfo` returns the same as `info`). `home` is the Home page: `shown`, `view` (`recent` or `folder:<id>`), `folder`, and the file `cards` and sidebar `folders` on screen this frame, each with its `rect` (`[x, y, width, height]` in points, for `ui.click`); see [Home](#home)
+- `ui.set {tool?, panels?, dockTabs?, dock?, dockWidth?, colorPanel?, maskTarget?, vectorMaskTarget?, selectionMode?, zoom?, center?, fit?, theme?, brushSize?, brushSection?, brushTab?, brushesView?, home?}`: change UI state; any other field is an error, checked before anything changes (`home` is `false` to leave the Home page, `"recent"` for its start view with the recent files, or `"folder:<id>"` for a folder's view; an unknown folder is an error and changes nothing; `theme` is `pro`, `proMedium`, `studio`, `studioLight` or `classic`; `selectionMode` is the selection tools' options-bar mode, 0 New, 1 Add, 2 Subtract, 3 Intersect; `brushSection` indexes the Brush Settings sections, `brushTab` 0 = Brush Settings, 1 = Brushes; `dock` is `{order: ["layers", …], heights: {"properties": 180}, collapsed: ["color"]}`, the right-dock groups top to bottom, their heights in points and the groups collapsed to their tab strip; `dockWidth` sets the right dock width in points, clamped to 250..520; `colorPanel` is `{background}`, whether the Color panel edits the background colour)
 - `ui.menu.invoke {id, wait?}` / `ui.menu.list`: activate a menu item by id; list the menu tree. A menu item that starts a background job (a filter without a dialog, such as Blur More) replies with the job's result once it has been applied; with `"wait": false` the reply is `{job, pending: true}` at once
 - `ui.set` also accepts `gradientBlendMode` (a layer blend mode name, such as `Difference`) and `gradientClassic` (boolean) for the Gradient tool options bar.
   Both gradient modes use the current preset, including its opacity stops. Select `Foreground to Transparent` through `gradient.presets.select`, or pass custom `stops` and `transparency: [[0,100],[1,0]]` (location 0..1, opacity 0..100). Use `applyToLayer: false` to edit only the tool preset. Classic gradient drags dispatch `paint.gradient` without overriding them.
@@ -151,6 +151,46 @@ are never written. The Actions list is `actions.json` in that same folder and su
 Headless CLI/MCP sessions and the web build keep brush presets and the action list for the session
 only, unless a store is attached. Gradient presets (including imported `.grd` groups) persist with
 the preferences.
+
+## Home
+
+The Home page (the house button at the start of the options bar, and the start page while no
+document is open) lists the recent files, newest opened first, and the project folders. A folder is
+a real directory: its files are listed (not its subfolders), files from elsewhere can be added
+without moving them, and it has three paths file dialogs start in: **Projects** (Save As, Save a
+Copy), **Exports** (Export As, Quick Export unless Export Preferences says same folder, Save for
+Web) and **Resources** (Open, Place). Exports and Resources are the Projects path until set. A
+document belongs to a folder when it was created with New Document Here… or opened from the
+folder's view, or when its file is inside one of the folder's directories; with no folder a dialog
+starts in the document's own directory, else in the folder of the most recently opened file.
+Nothing on Home moves or deletes a file: removing a folder or a recent entry only edits the lists.
+
+The lists are preferences (`home.folders`, `home.recentOpened`, `home.projectsRoot`, with File ›
+Open Recent's `fileHandling.recentFiles`). Thumbnails are 360 px PNGs in the settings folder's
+`thumbnails/`, rendered when a document is saved or opened and, for files never opened here, from
+the file when that is cheap (flat images up to 48 MB, a PSD's merged composite or embedded
+thumbnail, a `.pcraft` file's `thumb.png`).
+
+| Command | Params → result |
+|---|---|
+| `home.recent` | `{}` → `[{path, name, stem, ext, exists, openedAt, modifiedAt, size, thumbnail, thumbnailStale, open, document, folder}]`, most recently opened first (files without an open time sort by modification time; `document` is the index of the document that has it open) |
+| `home.forgetRecent` | `{path}`: remove from the recent list and drop its thumbnail; the file stays |
+| `home.folders` | `{}` → `[{id, name, path, exports, resources, exportsCustom, resourcesCustom, extras, exists, count}]` |
+| `home.folderNew` | `{name, path?, create?}`: `path` (absolute) defaults to `<projects root>/<name>`; `create` (default true) makes the directory, `false` links an existing one |
+| `home.folderEdit` | `{id, name?, path?, exports?, resources?, create?}`: `""` or `null` resets Exports/Resources to the Projects path |
+| `home.folderDelete` | `{id}`: remove the folder from Home (the directory and its files stay) |
+| `home.folderAdd` / `home.folderRemove` | `{id, path}`: list an image or document from elsewhere in the folder, or take it out again |
+| `home.folderFiles` | `{id}` → the folder's files (same rows as `home.recent`), newest modified first, at most 500 |
+| `home.setDocumentFolder` | `{folder, document?}`: the folder a document belongs to for this session (`null`: none) |
+| `home.documentFolder` | `{document?}` → folder id or `null` |
+| `home.defaultDir` | `{kind: "projects"\|"exports"\|"resources", folder?}` → the directory a dialog of that kind starts in, or `null` |
+| `home.setProjectsRoot` | `{path, create?}`: where New Folder creates folders (`null`: `~/Documents/PhotoCraft`) |
+
+Over the control channel and MCP, the commands that reach directories outside the automation roots
+are refused like `file.open`: `home.folderNew`, `home.folderAdd`, `home.folderFiles`,
+`home.setProjectsRoot`, `home.folderEdit` with `path`, `exports` or `resources`, and `prefs.set`
+on `home.*`. Reading the lists, forgetting entries, renaming and removing folders and assigning
+documents work (`crates/automation/src/workspace.rs`).
 
 ## Snapping
 
