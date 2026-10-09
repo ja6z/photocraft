@@ -16,6 +16,9 @@ const DENIED: &str = "automation filesystem access is not granted";
 #[derive(Clone)]
 struct RootCapability {
     dir: Arc<Dir>,
+    /// The root as an absolute path, so the app can record where a file it opened through the
+    /// capability really is (Open Recent, Home, File › Save). Never used for I/O.
+    path: PathBuf,
 }
 
 /// Separate directory capabilities for automation reads and writes.
@@ -35,6 +38,16 @@ impl AuthorizedWorkspace {
     /// omitted; omitted authority fails closed.
     pub fn new(read_root: Option<&Path>, write_root: Option<&Path>) -> Result<Self, AutomationError> {
         Ok(Self { read: open_root(read_root, "read")?, write: open_root(write_root, "write")? })
+    }
+
+    /// The read root as an absolute path, `None` without read authority.
+    pub fn read_root(&self) -> Option<&Path> {
+        self.read.as_ref().map(|root| root.path.as_path())
+    }
+
+    /// The write root as an absolute path, `None` without write authority.
+    pub fn write_root(&self) -> Option<&Path> {
+        self.write.as_ref().map(|root| root.path.as_path())
     }
 
     /// Read one regular file below the configured read root.
@@ -94,7 +107,11 @@ fn open_root(path: Option<&Path>, authority: &str) -> Result<Option<RootCapabili
     }
     let dir = Dir::open_ambient_dir(path, ambient_authority())
         .map_err(|e| AutomationError::Io(format!("cannot open automation {authority} root `{}`: {e}", path.display())))?;
-    Ok(Some(RootCapability { dir: Arc::new(dir) }))
+    // A root given relative to the launch directory is recorded as absolute: the app's own
+    // working directory (`/` for a Finder-launched app) says nothing about where it is.
+    let absolute =
+        std::path::absolute(path).map_err(|e| AutomationError::Io(format!("cannot resolve automation {authority} root `{}`: {e}", path.display())))?;
+    Ok(Some(RootCapability { dir: Arc::new(dir), path: absolute }))
 }
 
 fn relative_path(raw: &str) -> Result<PathBuf, AutomationError> {
@@ -313,6 +330,18 @@ mod tests {
         assert_eq!(workspace.read("read.txt").unwrap(), b"canary");
         workspace.write("new-output.txt", b"created").unwrap();
         assert_eq!(std::fs::read(inside.join("new-output.txt")).unwrap(), b"created");
+    }
+
+    #[test]
+    fn roots_are_reported_as_absolute_paths() {
+        let (inside, _, workspace) = roots("absolute");
+        assert_eq!(workspace.read_root(), Some(inside.as_path()));
+        assert_eq!(workspace.write_root(), Some(inside.as_path()));
+        // A root relative to the launch directory (tests run in the crate directory) is made
+        // absolute; an omitted authority has no root.
+        let relative = AuthorizedWorkspace::new(Some(Path::new("src")), None).unwrap();
+        assert_eq!(relative.read_root(), Some(std::env::current_dir().unwrap().join("src").as_path()));
+        assert_eq!(relative.write_root(), None);
     }
 
     fn temp_files(dir: &Path) -> Vec<String> {

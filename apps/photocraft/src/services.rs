@@ -187,6 +187,8 @@ fn local_offset(unix: i64) -> i32 {
 
 pub fn native(automation: Option<photocraft_automation::AuthorizedWorkspace>) -> Services {
     let clip: Rc<RefCell<Option<arboard::Clipboard>>> = Rc::default();
+    let automation_read_root = automation.as_ref().and_then(|workspace| workspace.read_root().map(Path::to_path_buf));
+    let automation_write_root = automation.as_ref().and_then(|workspace| workspace.write_root().map(Path::to_path_buf));
     let automation_read = automation.clone().map(|workspace| {
         Box::new(move |path: &str| {
             let bytes = workspace.read(path).map_err(|error| error.to_string())?;
@@ -255,6 +257,8 @@ pub fn native(automation: Option<photocraft_automation::AuthorizedWorkspace>) ->
         write: Some(Box::new(|path: &str, bytes: &[u8]| write_atomic(Path::new(path), bytes))),
         automation_read,
         automation_write,
+        automation_read_root,
+        automation_write_root,
         automation_command,
         automation_authorize,
         encode_png: Some(Box::new(|w, h, rgba| {

@@ -272,6 +272,12 @@ pub struct Services {
     /// using `pick_open`, `pick_save` and `write` with the user's authority.
     pub automation_read: Option<AutomationReadFn>,
     pub automation_write: Option<AutomationWriteFn>,
+    /// The folders behind [`Self::automation_read`] and [`Self::automation_write`], as absolute
+    /// paths. A file an agent opens or saves (by a root-relative path) is recorded where it
+    /// really is, so Open Recent, Home and File › Save find it. Without them the document keeps
+    /// the root-relative path.
+    pub automation_read_root: Option<std::path::PathBuf>,
+    pub automation_write_root: Option<std::path::PathBuf>,
     pub automation_command: Option<AutomationCommandFn>,
     /// Same policy as [`Self::automation_command`], as a function pointer the engine calls for
     /// each step of `actions.play`. Installed on the session only while a control request or
@@ -978,16 +984,29 @@ impl PhotocraftApp {
     /// written and the export warnings (also shown to the user).
     pub fn save_automation(&mut self, path: Option<String>) -> Result<(String, Vec<String>), String> {
         let state = self.session.active().ok_or("no document")?;
-        // As File › Save: without `path` only a layered file is written back (#416).
-        let target = path
-            .or_else(|| state.path.clone().filter(|p| photocraft_engine::file_cmds::saves_in_place(p)))
-            .ok_or("pass `path`: a save without one writes back only to the document's own PSD, PSB or .pcraft file")?;
+        let write_root = self.services.automation_write_root.as_deref();
+        // As File › Save: without `path` only a layered file is written back (#416). The
+        // document's own path is absolute once the roots are known; the writer takes it
+        // relative to the write root.
+        let target = match path {
+            Some(path) => path,
+            None => {
+                let own = state
+                    .path
+                    .clone()
+                    .filter(|p| photocraft_engine::file_cmds::saves_in_place(p))
+                    .ok_or("pass `path`: a save without one writes back only to the document's own PSD, PSB or .pcraft file")?;
+                file_open::automation_relative(&own, write_root)
+                    .ok_or_else(|| format!("pass `path`: the document's file `{own}` is outside the automation write root"))?
+            }
+        };
+        let location = file_open::automation_location(write_root, &target);
         let export = self.services.export.as_ref().ok_or("no exporter configured")?;
         let (bytes, warnings) = export(&state.doc, &target, &ExportSettings::default())?;
         let write = self.services.automation_write.as_mut().ok_or("automation write authority is not configured")?;
         write(&target, &bytes)?;
         if let Some(state) = self.session.active_mut() {
-            state.path = Some(target.clone());
+            state.path = Some(location);
             state.saved_revision = state.revision;
         }
         self.ui.status = format!("Saved {target}");

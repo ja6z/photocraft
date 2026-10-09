@@ -43,6 +43,28 @@ pub fn display_name(path: &str) -> String {
     std::path::Path::new(path).file_name().map(|n| n.to_string_lossy().to_string()).filter(|n| !n.is_empty()).unwrap_or_else(|| path.to_string())
 }
 
+/// Where a root-relative automation path (`photos/a.psd`) really is: below `root` when the
+/// control session's root is known, else the relative path as given.
+pub(crate) fn automation_location(root: Option<&std::path::Path>, relative: &str) -> String {
+    match root {
+        Some(root) => root.join(relative).to_string_lossy().into_owned(),
+        None => relative.to_string(),
+    }
+}
+
+/// The inverse of [`automation_location`]: `path` relative to `root`, with `/` separators, as
+/// the automation writer takes it. A relative `path` (recorded without a known root) already
+/// is; an absolute one outside `root`, or with no root to compare to, has none.
+pub(crate) fn automation_relative(path: &str, root: Option<&std::path::Path>) -> Option<String> {
+    let path = std::path::Path::new(path);
+    if path.is_relative() {
+        return Some(path.to_string_lossy().into_owned());
+    }
+    let inside = path.strip_prefix(root?).ok()?;
+    let parts: Vec<String> = inside.components().map(|c| c.as_os_str().to_string_lossy().into_owned()).collect();
+    (!parts.is_empty()).then(|| parts.join("/"))
+}
+
 impl PhotocraftApp {
     /// Open `bytes` read from the file at `path`: the document is named after the file, keeps
     /// `path` for File › Save, and `path` goes to the top of Open Recent. Returns the import
