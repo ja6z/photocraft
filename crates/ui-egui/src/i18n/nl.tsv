@@ -3585,3 +3585,63 @@ cameraRaw	Whites	Witten
 	Quick Selection found nothing there	Snelle selectie heeft daar niets gevonden
 	Object Selection found nothing there — try a tighter rectangle	Objectselectie heeft daar niets gevonden — probeer een krappere rechthoek
 	No subject found — try a rectangle around the object	Geen onderwerp gevonden — probeer een rechthoek rond het object
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Tonen in Finder
+	Show in Explorer	Tonen in Verkenner
+	Show in Folder	Tonen in map
+	Folders	Mappen
+	New Folder…	Nieuwe map…
+	New Folder	Nieuwe map
+	Rename Folder	Map hernoemen
+	Folder Paths	Mappaden
+	Folder Paths…	Mappaden…
+	Folders keep a project's files together and set where they're saved.	Mappen houden de bestanden van een project bij elkaar en bepalen waar ze worden opgeslagen.
+	This folder isn't on disk any more.	Deze map staat niet meer op de schijf.
+	Remove from Home	Verwijderen uit Start
+homePage	Home	Start
+	Presets or a custom size	Voorinstellingen of een aangepast formaat
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG en meer
+	Recently opened	Recent geopend
+	No recent files yet	Nog geen recente bestanden
+	Files you open or save show up here, newest first.	Bestanden die je opent of opslaat verschijnen hier, nieuwste eerst.
+	New Document Here…	Nieuw document hier…
+	Projects	Projecten
+	Exports	Exports
+	Resources	Bronnen
+	same as Projects	zelfde als Projecten
+	Click to choose another folder.	Klik om een andere map te kiezen.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Deze map staat niet meer op de schijf. Kies hierboven bij Projecten waar hij nu staat.
+	Files	Bestanden
+	This folder is empty	Deze map is leeg
+	Save a document here, or add files to it from Recent.	Sla hier een document op of voeg bestanden toe vanuit Recent.
+	Showing files in the file manager isn't available here.	Bestanden tonen in het bestandsbeheer is hier niet beschikbaar.
+	Added {name} to the folder.	{name} is aan de map toegevoegd.
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} staat daar niet meer: het is verplaatst, hernoemd of verwijderd.
+@plural	{n} file|{n} files	{n} bestand|{n} bestanden
+	Opened just now	Zojuist geopend
+	Modified just now	Zojuist gewijzigd
+	Opened {n} min ago	{n} min geleden geopend
+	Modified {n} min ago	{n} min geleden gewijzigd
+	Opened today at {time}	Vandaag om {time} geopend
+	Modified today at {time}	Vandaag om {time} gewijzigd
+	Opened yesterday at {time}	Gisteren om {time} geopend
+	Modified yesterday at {time}	Gisteren om {time} gewijzigd
+	Opened {date}	Geopend op {date}
+	Modified {date}	Gewijzigd op {date}
+homeBadge	Open	Geopend
+	File missing	Bestand ontbreekt
+	Remove {name} from Recent	{name} verwijderen uit Recent
+	Remove from Recent	Verwijderen uit Recent
+	Add to Folder	Aan map toevoegen
+	Remove from Folder	Uit map verwijderen
+	Folder name	Mapnaam
+	No folder chosen	Geen map gekozen
+	For example: Flyers 2026	Bijvoorbeeld: Flyers 2026
+	Create a new folder in:	Nieuwe map maken in:
+	Use an existing folder:	Bestaande map gebruiken:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft verplaatst of verwijdert je bestanden nooit. Een map uit Start verwijderen haalt hem alleen van de lijst.
+	Save As and Save a Copy start here (.psd, .pcraft).	Opslaan als en Kopie opslaan beginnen hier (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	Exporteren als, Snel exporteren en Opslaan voor web beginnen hier (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	Openen en Plaatsen beginnen hier: foto's, logo's en ander materiaal.
+	Same as Projects until you choose one.	Zelfde als Projecten totdat je er een kiest.

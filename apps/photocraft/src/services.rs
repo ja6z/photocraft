@@ -94,9 +94,7 @@ fn show_file_dialog(request: FileDialogRequest, parent: Option<&eframe::Frame>, 
     }
     let answer: Pin<Box<dyn Future<Output = Option<FileDialogAnswer>> + Send>> = match request {
         FileDialogRequest::Open { multiple, initial_dir, extensions } => {
-            if let Some(dir) = initial_dir {
-                dialog = dialog.set_directory(dir);
-            }
+            dialog = start_in(dialog, initial_dir.as_deref());
             // A command-specific filter must not inherit the image formats used by File › Open.
             let dialog = if let Some(exts) = extensions {
                 dialog.add_filter("Supported Files", &open_filter_extensions(&exts.iter().map(String::as_str).collect::<Vec<_>>()))
@@ -121,11 +119,17 @@ fn show_file_dialog(request: FileDialogRequest, parent: Option<&eframe::Frame>, 
             if let Some(name) = Path::new(&suggested).file_name() {
                 dialog = dialog.set_file_name(name.to_string_lossy());
             }
-            if let Some(dir) = Path::new(&suggested).parent().filter(|p| !p.as_os_str().is_empty()) {
+            // A suggestion with a folder (the document's, a Home folder's) starts there.
+            if let Some(dir) = save_dir(&suggested) {
                 dialog = dialog.set_directory(dir);
             }
             let picked = dialog.save_file();
             Box::pin(async move { picked.await.map(|file| FileDialogAnswer::SaveTo(path_of(&file))) })
+        }
+        // Home's folder paths: one directory.
+        FileDialogRequest::Folder { initial_dir } => {
+            let picked = start_in(dialog, initial_dir.as_deref()).pick_folder();
+            Box::pin(async move { picked.await.map(|dir| FileDialogAnswer::Paths(vec![path_of(&dir)])) })
         }
     };
     // Without the thread the reply is dropped unanswered, which the app takes as Cancel.
@@ -303,8 +307,64 @@ fn shell_word(s: &str) -> String {
     if s.bytes().all(|b| b.is_ascii_alphanumeric() || b"/._-+:,@".contains(&b)) { s.to_string() } else { format!("'{}'", s.replace('\'', r"'\''")) }
 }
 
+/// `d` starting in `dir` when that is a directory (Home folders, the active document's folder,
+/// the last-used folder; see `PhotocraftApp::dialog_dir`); otherwise where the system puts it.
+fn start_in(d: rfd::AsyncFileDialog, dir: Option<&str>) -> rfd::AsyncFileDialog {
+    match dir.map(Path::new).filter(|p| p.is_dir()) {
+        Some(p) => d.set_directory(p),
+        None => d,
+    }
+}
+
+/// The directory a save dialog for `suggested` starts in: its directory part, when it has one
+/// that exists.
+fn save_dir(suggested: &str) -> Option<&Path> {
+    Path::new(suggested).parent().filter(|d| !d.as_os_str().is_empty() && d.is_dir())
+}
+
+/// Show `path` in the system file manager: a folder opens, a file is selected in its folder.
+fn reveal(path: &str) -> Result<(), String> {
+    let p = Path::new(path);
+    if !p.exists() {
+        return Err(format!("{path} doesn't exist"));
+    }
+    if p.is_dir() {
+        return open::that_detached(p).map_err(|e| e.to_string());
+    }
+    #[cfg(target_os = "macos")]
+    {
+        spawn_reaped(std::process::Command::new("open").arg("-R").arg(p))
+    }
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        spawn_reaped(std::process::Command::new("explorer").raw_arg(format!("/select,\"{path}\"")))
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        let dir = p.parent().ok_or_else(|| format!("{path} has no folder"))?;
+        open::that_detached(dir).map_err(|e| e.to_string())
+    }
+}
+
+/// Start `cmd` and reap it in the background, so it doesn't linger as a zombie.
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+fn spawn_reaped(cmd: &mut std::process::Command) -> Result<(), String> {
+    let mut child = cmd.spawn().map_err(|e| e.to_string())?;
+    std::thread::spawn(move || child.wait());
+    Ok(())
+}
+
+/// The local time zone's offset from UTC at `unix` (Home's "today at 14:05").
+fn local_offset(unix: i64) -> i32 {
+    use chrono::TimeZone;
+    chrono::Local.timestamp_opt(unix, 0).single().map(|d| d.offset().local_minus_utc()).unwrap_or(0)
+}
+
 pub fn native(automation: Option<photocraft_automation::AuthorizedWorkspace>) -> Services {
     let clip: Rc<RefCell<Option<arboard::Clipboard>>> = Rc::default();
+    let automation_read_root = automation.as_ref().and_then(|workspace| workspace.read_root().map(Path::to_path_buf));
+    let automation_write_root = automation.as_ref().and_then(|workspace| workspace.write_root().map(Path::to_path_buf));
     let automation_read = automation.clone().map(|workspace| {
         Box::new(move |path: &str| {
             let bytes = workspace.read(path).map_err(|error| error.to_string())?;
@@ -334,9 +394,13 @@ pub fn native(automation: Option<photocraft_automation::AuthorizedWorkspace>) ->
         })),
         save_file: Some(Arc::new(save_file)),
         file_dialog: Some(Box::new(show_file_dialog)),
+        reveal: Some(Box::new(reveal)),
+        local_offset: Some(local_offset),
         write: Some(Box::new(|path: &str, bytes: &[u8]| write_atomic(Path::new(path), bytes))),
         automation_read,
         automation_write,
+        automation_read_root,
+        automation_write_root,
         automation_command,
         automation_authorize,
         encode_png: Some(Box::new(|w, h, rgba| {
@@ -518,6 +582,26 @@ mod tests {
         assert_eq!(xwayland_command(Some(""), Some(""), true).as_deref(), Some("WAYLAND_DISPLAY= photocraft"));
         // No X server (XWayland disabled): nothing to suggest.
         assert_eq!(xwayland_command(None, Some("/opt/p.AppImage"), false), None);
+    }
+
+    /// Save dialogs start in the suggestion's folder when it has one that exists (Home folders,
+    /// the document's own folder); a bare name or a missing folder leaves it to the system.
+    #[test]
+    fn save_dialogs_start_in_the_suggested_folder() {
+        let dir = std::env::temp_dir().join(format!("pc-save-dir-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let suggested = dir.join("Flyer.psd").to_string_lossy().into_owned();
+        assert_eq!(save_dir(&suggested), Some(dir.as_path()));
+        assert_eq!(save_dir("Flyer.psd"), None);
+        assert_eq!(save_dir(&dir.join("missing/Flyer.psd").to_string_lossy()), None);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn local_offset_is_a_sane_time_zone() {
+        // Somewhere between UTC-12 and UTC+14, on any machine.
+        let off = local_offset(1_791_417_600);
+        assert!((-12 * 3600..=14 * 3600).contains(&off), "{off}");
     }
 
     /// Tests every native save dialog and records the suggested file name. Each name's file type must come first

@@ -3513,3 +3513,64 @@ cameraRaw	Masking	Маскування
 	Quick Selection found nothing there	Швидке виділення нічого тут не знайшло
 	Object Selection found nothing there — try a tighter rectangle	Виділення об'єктів нічого тут не знайшло — спробуйте вужчий прямокутник
 	No subject found — try a rectangle around the object	Об'єкт не знайдено — спробуйте прямокутник навколо об'єкта
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Показати у Finder
+	Show in Explorer	Показати в Провіднику
+	Show in Folder	Показати в теці
+	Folders	Теки
+	New Folder…	Нова тека…
+	New Folder	Нова тека
+	Rename Folder	Перейменувати теку
+	Folder Paths	Шляхи теки
+	Folder Paths…	Шляхи теки…
+	Folders keep a project's files together and set where they're saved.	Теки збирають файли проєкту разом і визначають, куди їх зберігати.
+	This folder isn't on disk any more.	Цієї теки більше немає на диску.
+	Remove from Home	Прибрати з головної
+homePage	Home	Головна
+	Presets or a custom size	Набори або власний розмір
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG та інші
+	Recently opened	Нещодавно відкриті
+	No recent files yet	Нещодавніх файлів ще немає
+	Files you open or save show up here, newest first.	Файли, які ви відкриваєте або зберігаєте, з'являться тут, спершу найновіші.
+	New Document Here…	Новий документ тут…
+	Projects	Проєкти
+	Exports	Експорт
+	Resources	Ресурси
+	same as Projects	як «Проєкти»
+	Click to choose another folder.	Клацніть, щоб вибрати іншу теку.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Цієї теки більше немає на диску. Укажіть, де вона тепер, у полі «Проєкти» вище.
+	Files	Файли
+	This folder is empty	Ця тека порожня
+	Save a document here, or add files to it from Recent.	Збережіть сюди документ або додайте файли з нещодавніх.
+	Showing files in the file manager isn't available here.	Показ файлів у файловому менеджері тут недоступний.
+	Added {name} to the folder.	Файл {name} додано до теки.
+	{name} isn't there any more: it was moved, renamed or deleted.	Файлу {name} там більше немає: його перемістили, перейменували або видалили.
+@plural	{n} file|{n} files	{n} файл|{n} файли|{n} файлів
+	Opened just now	Відкрито щойно
+	Modified just now	Змінено щойно
+	Opened {n} min ago	Відкрито {n} хв тому
+	Modified {n} min ago	Змінено {n} хв тому
+	Opened today at {time}	Відкрито сьогодні о {time}
+	Modified today at {time}	Змінено сьогодні о {time}
+	Opened yesterday at {time}	Відкрито вчора о {time}
+	Modified yesterday at {time}	Змінено вчора о {time}
+	Opened {date}	Відкрито {date}
+	Modified {date}	Змінено {date}
+homeBadge	Open	Відкрито
+	File missing	Файл не знайдено
+	Remove {name} from Recent	Прибрати {name} з нещодавніх
+	Remove from Recent	Прибрати з нещодавніх
+	Add to Folder	Додати до теки
+	Remove from Folder	Прибрати з теки
+	Folder name	Назва теки
+	No folder chosen	Теку не вибрано
+	For example: Flyers 2026	Наприклад: Флаєри 2026
+	Change…	Змінити…
+	Create a new folder in:	Створити нову теку в:
+	Use an existing folder:	Використати наявну теку:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft ніколи не переміщує й не видаляє ваші файли. Якщо прибрати теку з головної, вона лише зникне зі списку.
+	Save As and Save a Copy start here (.psd, .pcraft).	«Зберегти як» і «Зберегти копію» відкриваються тут (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	«Експортувати як», швидкий експорт і «Зберегти для вебу» відкриваються тут (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	«Відкрити» і «Розмістити» відкриваються тут: фото, логотипи та інші матеріали.
+	Same as Projects until you choose one.	Як «Проєкти», доки ви не виберете іншу.

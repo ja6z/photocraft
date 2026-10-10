@@ -8,8 +8,9 @@
 //! - `engine.commands`: list commands with enablement
 //! - `ui.inspect`: full UI state (tool, panels, views, dialogs, windows, window size); the menu
 //!   tree is `ui.menu.list`
-//! - `ui.set {tool?, panels?, dock?, dockTabs?, dockWidth?, colorPanel?, maskTarget?, vectorMaskTarget?, selectionMode?, zoom?, center?, rotation?, fit?, theme?, brushSection?, brushTab?, brushesView?, brushPicker?, brushPickerName?, brushPickerStroke?, brushPickerTip?, brushPickerScale?, brushSize?}`:
-//!   change UI state; any other field is an error ([`UI_SET_FIELDS`])
+//! - `ui.set {tool?, panels?, dock?, dockTabs?, dockWidth?, colorPanel?, maskTarget?, vectorMaskTarget?, selectionMode?, zoom?, center?, rotation?, fit?, theme?, brushSection?, brushTab?, brushesView?, brushPicker?, brushPickerName?, brushPickerStroke?, brushPickerTip?, brushPickerScale?, brushSize?, home?}`:
+//!   change UI state; any other field is an error ([`UI_SET_FIELDS`]). `home` is `false`,
+//!   `"recent"` or `"folder:<id>"` (Home's view)
 //! - `ui.dialog.open {kind, fields?}` (kinds: newDocument, about, layerStyle {effect?}, colorPicker {target: foreground|background}, command {command}) / `ui.dialog.set {dialog, field, value}` / `ui.dialog.confirm {dialog, wait?}` / `ui.dialog.cancel {dialog}`
 //! - `ui.dialog.apply {dialog}`: commit Preferences changes without closing the dialog
 //! - `ui.window.open {document?}` / `ui.window.close {window}`: extra document windows
@@ -74,7 +75,7 @@ pub enum Outcome {
 /// field's value is validated before the first one is applied, so a typo, an unknown field, a
 /// bad value or a bad nested key can't reply with success while nothing — or only half of it —
 /// changed (#412).
-pub const UI_SET_FIELDS: [&str; 33] = [
+pub const UI_SET_FIELDS: [&str; 34] = [
     "tool",
     "panels",
     "dock",
@@ -108,6 +109,7 @@ pub const UI_SET_FIELDS: [&str; 33] = [
     "cropOverlayOrientation",
     "cropShield",
     "shapeStroke",
+    "home",
 ];
 
 /// Most clicks one `ui.click` may queue (#982). Each click is a press and a release that the app
@@ -328,6 +330,11 @@ fn dispatch(app: &mut PhotocraftApp, ctx: &egui::Context, req: &ControlRequest) 
                 };
                 let tool = match s("tool") {
                     Some(t) => Tool::from_name(t).map(Some).ok_or_else(|| format!("unknown tool `{t}`"))?,
+                    None => None,
+                };
+                // Home's view: `false`, "recent" or "folder:<id>" (an unknown folder is an error).
+                let home = match p.get("home") {
+                    Some(v) => Some(crate::home_ui::parse_view(app, v)?),
                     None => None,
                 };
                 let gradient_classic = bool_field(p, "gradientClassic")?;
@@ -591,6 +598,9 @@ fn dispatch(app: &mut PhotocraftApp, ctx: &egui::Context, req: &ControlRequest) 
                 // Which chip the Color panel edits.
                 if let Some(c) = color_panel {
                     app.ui.color_panel = c;
+                }
+                if let Some(view) = home {
+                    crate::home_ui::apply_view(app, view);
                 }
                 if let Some(size) = brush_size {
                     app.run("tools.setBrush", json!({"brush": {"size": size}})).map_err(|e| e.to_string())?;
@@ -926,8 +936,11 @@ fn dispatch(app: &mut PhotocraftApp, ctx: &egui::Context, req: &ControlRequest) 
                     let name = app.open_name(&name);
                     let warnings = app.open_automation_bytes(&name, &bytes)?;
                     // Brushes/gradients go to the preset libraries: no document, no Open Recent entry.
+                    // The document records where the file really is (Open Recent, Home and
+                    // File › Save look it up from the app, not from the agent's root).
                     if !crate::preset_files_ui::is_preset_file(&name) {
-                        app.opened_from(path);
+                        let location = crate::file_open::automation_location(app.services.automation_read_root.as_deref(), path);
+                        app.opened_from(&location);
                     }
                     Ok(json!({"path": path, "name": name, "warnings": warnings}))
                 }))
@@ -1005,6 +1018,7 @@ pub fn inspect(app: &PhotocraftApp, ctx: &egui::Context) -> Value {
         "brush": {"size": app.session.tools.brush.size, "hardness": app.session.tools.brush.hardness, "opacity": app.session.tools.brush.opacity},
         "distort": app.distort.describe(),
         "jobs": crate::jobs_ui::inspect(app),
+        "home": crate::home_ui::inspect(app),
         "cameraRaw": app.camera_raw.as_ref().map(|d| d.describe(&app.ui.camera_raw_scope, &app.ui.camera_raw_preview)),
     })
 }
@@ -1778,6 +1792,76 @@ mod tests {
         assert_eq!(app.session.active().unwrap().path, None);
         let r = call(&mut app, &ctx, "app.save", json!({}));
         assert!(r["error"].as_str().unwrap().contains("pass `path`"), "{r}");
+    }
+
+    /// With the roots known, a file an agent opens is recorded at its real location (Open
+    /// Recent, Home and the app's own File › Save run in a process whose working directory is
+    /// unrelated, `/` when launched from Finder), while the agent keeps using root-relative paths.
+    #[test]
+    fn automation_open_records_the_real_path_and_saves_stay_root_relative() {
+        use photocraft_color::{ColorMode, SampleType};
+        use photocraft_doc::Document;
+        use photocraft_geom::Size;
+        use std::cell::RefCell;
+        use std::rc::Rc;
+
+        let root = std::env::temp_dir().join("photocraft-automation-roots");
+        let other = std::env::temp_dir().join("photocraft-automation-other");
+        let real = |rel: &str| root.join(rel).to_string_lossy().into_owned();
+        let app_with = |write_root: &std::path::Path, written: Rc<RefCell<Vec<String>>>| {
+            let services = crate::Services {
+                import: Some(Box::new(|name: &str, _b: &[u8], _depth: usize| {
+                    Ok((Document::new(name, Size::new(4, 4), ColorMode::Rgb, SampleType::U8), Vec::new()))
+                })),
+                export: Some(Box::new(|_d: &Document, _p: &str, _s: &crate::ExportSettings| Ok((b"out".to_vec(), Vec::new())))),
+                automation_read: Some(Box::new(|path: &str| Ok((path.rsplit('/').next().unwrap_or(path).to_string(), b"x".to_vec())))),
+                automation_write: Some(Box::new(move |path: &str, _b: &[u8]| {
+                    written.borrow_mut().push(path.to_string());
+                    Ok(())
+                })),
+                automation_read_root: Some(root.clone()),
+                automation_write_root: Some(write_root.to_path_buf()),
+                ..Default::default()
+            };
+            PhotocraftApp::new(photocraft_engine::Session::new(), services)
+        };
+        let ctx = egui::Context::default();
+
+        let written: Rc<RefCell<Vec<String>>> = Rc::default();
+        let mut app = app_with(&root, written.clone());
+        let r = call(&mut app, &ctx, "app.open", json!({"path": "in/layered.psd"}));
+        assert_eq!(r["result"]["path"], "in/layered.psd", "the agent's path is echoed: {r}");
+        assert_eq!(app.session.active().unwrap().path.as_deref(), Some(real("in/layered.psd").as_str()));
+        assert_eq!(app.ui.recent_files, vec![real("in/layered.psd")]);
+        // A save without `path` writes back to the same file, relative to the write root.
+        let r = call(&mut app, &ctx, "app.save", json!({}));
+        assert_eq!(r["result"]["path"], "in/layered.psd", "{r}");
+        assert_eq!(*written.borrow(), vec!["in/layered.psd".to_string()]);
+        assert_eq!(app.session.active().unwrap().path.as_deref(), Some(real("in/layered.psd").as_str()));
+        // Save As by an agent: the document now lives at the new file's real location.
+        let r = call(&mut app, &ctx, "app.save", json!({"path": "out/copy.psd"}));
+        assert_eq!(r["result"]["path"], "out/copy.psd", "{r}");
+        assert_eq!(app.session.active().unwrap().path.as_deref(), Some(real("out/copy.psd").as_str()));
+        // An absolute path beneath the roots (#2176) is already where the file is.
+        let r = call(&mut app, &ctx, "app.open", json!({"path": real("in/flat.psd")}));
+        assert_eq!(r["result"]["path"], real("in/flat.psd"), "{r}");
+        assert_eq!(app.session.active().unwrap().path.as_deref(), Some(real("in/flat.psd").as_str()));
+        let r = call(&mut app, &ctx, "app.save", json!({}));
+        assert_eq!(r["result"]["path"], "in/flat.psd", "written back relative to the write root: {r}");
+        let r = call(&mut app, &ctx, "app.save", json!({"path": real("out/flat.psd")}));
+        assert_eq!(r["result"]["path"], real("out/flat.psd"), "{r}");
+        assert_eq!(app.session.active().unwrap().path.as_deref(), Some(real("out/flat.psd").as_str()));
+
+        // A file read from one root can't be written back without `path` when writes go elsewhere.
+        let written: Rc<RefCell<Vec<String>>> = Rc::default();
+        let mut app = app_with(&other, written.clone());
+        call(&mut app, &ctx, "app.open", json!({"path": "in/layered.psd"}));
+        let r = call(&mut app, &ctx, "app.save", json!({}));
+        assert!(r["error"].as_str().unwrap().contains("outside the automation write root"), "{r}");
+        assert!(written.borrow().is_empty());
+        let r = call(&mut app, &ctx, "app.save", json!({"path": "in/layered.psd"}));
+        assert_eq!(r["result"]["path"], "in/layered.psd", "{r}");
+        assert_eq!(app.session.active().unwrap().path.as_deref(), Some(other.join("in/layered.psd").to_string_lossy().as_ref()));
     }
 
     fn deny_ambient_file(id: &str, _: &serde_json::Value) -> photocraft_engine::Result<()> {

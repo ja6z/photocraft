@@ -347,7 +347,10 @@ fn main() -> eframe::Result {
                         services::xwayland_command(var("FLATPAK_ID").as_deref(), var("APPIMAGE").as_deref(), std::env::var_os("DISPLAY").is_some());
                 }
             }
-            let mut app = PhotocraftApp::new(Session::new(), services);
+            // Home keeps its thumbnails in the settings folder (`thumbnails/`).
+            let mut session = Session::new();
+            session.home.data_dir = services::config_dir();
+            let mut app = PhotocraftApp::new(session, services);
             app.integrated_titlebar = cfg!(target_os = "macos");
             app.custom_titlebar = custom_titlebar;
             // Only the title bar's free gap drags the window, never the menus (mac_window.rs).

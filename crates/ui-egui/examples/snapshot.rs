@@ -20,6 +20,9 @@
 //! `--right-click-at X,Y` opens a screen-space context menu after the script, including panel
 //! and document-tab menus that are outside the document-coordinate control pointer.
 //! `--click-at X,Y` opens a screen-space menu (for example the top Select menu) after the script.
+//!
+//! `--prefs preferences.json` starts with those preferences (recent files, Home folders…) and
+//! `--data-dir DIR` keeps Home's thumbnails in `DIR/thumbnails`, like the app's settings folder.
 
 use photocraft_ui_egui::control::{ControlRequest, Outcome, handle};
 use photocraft_ui_egui::{PhotocraftApp, Services};
@@ -56,8 +59,10 @@ fn main() {
             photocraft_io::export(doc, path, &opts).map(|r| (r.bytes, r.warnings)).map_err(|e| e.to_string())
         })),
         write: Some(Box::new(|path: &str, bytes: &[u8]| photocraft_format::atomic_write(std::path::Path::new(path), bytes).map_err(|e| e.to_string()))),
+        load_prefs: arg(&args, "--prefs").map(|p| Box::new(move || Some(std::fs::read_to_string(&p).expect("read --prefs"))) as photocraft_ui_egui::LoadTextFn),
         ..Default::default()
     };
+    let data_dir = arg(&args, "--data-dir").map(std::path::PathBuf::from);
     let open = arg(&args, "--open");
     let safe_gpu = args.iter().any(|a| a == "--safe-gpu");
     // `--background-jobs`: long commands run as background jobs, as in the desktop app (#210).
@@ -71,7 +76,9 @@ fn main() {
             let mut services = services;
             services.is_wayland = wayland_notice;
             services.xwayland_command = wayland_notice.then(|| "WAYLAND_DISPLAY= photocraft".into());
-            let mut app = PhotocraftApp::new(photocraft_engine::Session::new(), services);
+            let mut session = photocraft_engine::Session::new();
+            session.home.data_dir = data_dir;
+            let mut app = PhotocraftApp::new(session, services);
             app.background_jobs = background_jobs;
             app.custom_titlebar = custom_titlebar;
             // `--safe-gpu`: the CPU canvas, as the desktop app's `--safe-gpu` launch.

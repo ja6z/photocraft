@@ -779,10 +779,9 @@ pub fn options_bar(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
         .frame(egui::Frame::NONE.fill(t.chrome).inner_margin(egui::Margin::symmetric(10, 0)))
         .show(ui, |ui| {
             ui.horizontal_centered(|ui| {
-                if t.pro {
-                    crate::chrome_ui::home_button(app, ui);
-                    widgets::vline(ui, 22.0);
-                }
+                // Home, in every theme (Photoshop puts it first in the options bar).
+                crate::chrome_ui::home_button(app, ui);
+                widgets::vline(ui, 22.0);
                 let _ = icons::button(ui, icons::tool_icon(app.ui.tool), if t.pro { 26.0 } else { 28.0 }, !t.pro, tl!(app.ui.tool.label()));
                 if t.pro {
                     let (r, _) = ui.allocate_exact_size(vec2(10.0, 20.0), Sense::hover());
@@ -3967,6 +3966,8 @@ mod embedding_tests {
         let mut h = egui_kittest::Harness::builder().with_size(vec2(1280.0, 800.0)).with_max_steps(64).build_eframe(move |cc| {
             PhotocraftApp::setup_context(&cc.egui_ctx, Default::default());
             let mut app = PhotocraftApp::new(photocraft_engine::Session::new(), crate::Services::default());
+            // With a document open: Home, shown while there is none, covers the dock.
+            app.run("file.new", serde_json::json!({"width": 64, "height": 64})).unwrap();
             app.ui.panels.rail = rail;
             app.ui.panels.menu_bar = menu_bar;
             app

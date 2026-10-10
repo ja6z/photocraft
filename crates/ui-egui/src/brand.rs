@@ -44,6 +44,13 @@ pub fn paint_mark(ui: &Ui, r: Rect) {
     ui.ctx().data_mut(|d| d.insert_temp(rect_id(), r));
 }
 
+/// Paint the mark into `r` without recording where (Home's sidebar; the title bar's mark is the
+/// one tests look for).
+pub fn paint_icon(ui: &Ui, r: Rect) {
+    let uv = Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0));
+    ui.painter().image(texture(ui.ctx()).id(), r, uv, Color32::WHITE);
+}
+
 /// The rect the mark was last painted into.
 #[cfg(test)]
 pub fn mark_rect(ctx: &Context) -> Option<Rect> {

@@ -43,6 +43,30 @@ pub fn display_name(path: &str) -> String {
     std::path::Path::new(path).file_name().map(|n| n.to_string_lossy().to_string()).filter(|n| !n.is_empty()).unwrap_or_else(|| path.to_string())
 }
 
+/// Where an automation path really is: a root-relative one (`photos/a.psd`) below `root` when
+/// the control session's root is known, else as given; an absolute one beneath the root (#2176)
+/// is already where it is.
+pub(crate) fn automation_location(root: Option<&std::path::Path>, path: &str) -> String {
+    match root {
+        // `join` keeps an absolute `path` as it is.
+        Some(root) => root.join(path).to_string_lossy().into_owned(),
+        None => path.to_string(),
+    }
+}
+
+/// The inverse of [`automation_location`]: `path` relative to `root`, with `/` separators, as
+/// the automation writer takes it. A relative `path` (recorded without a known root) already
+/// is; an absolute one outside `root`, or with no root to compare to, has none.
+pub(crate) fn automation_relative(path: &str, root: Option<&std::path::Path>) -> Option<String> {
+    let path = std::path::Path::new(path);
+    if path.is_relative() {
+        return Some(path.to_string_lossy().into_owned());
+    }
+    let inside = path.strip_prefix(root?).ok()?;
+    let parts: Vec<String> = inside.components().map(|c| c.as_os_str().to_string_lossy().into_owned()).collect();
+    (!parts.is_empty()).then(|| parts.join("/"))
+}
+
 impl PhotocraftApp {
     /// Open `bytes` read from the file at `path`: the document is named after the file, keeps
     /// `path` for File › Save unless it is a derivative preview, and `path` goes to the top of Open Recent. Returns the import
@@ -63,7 +87,9 @@ impl PhotocraftApp {
     }
 
     /// Record that the active document was just opened from `path`: File › Save writes back to it
-    /// (unless it's a template or derivative preview) and it goes to the top of Open Recent.
+    /// (unless it's a template or derivative preview) and it goes to the top of Open Recent. Home
+    /// gets its thumbnail if it has none yet, and a file opened from a Home folder belongs to that
+    /// folder.
     pub(crate) fn opened_from(&mut self, path: &str) {
         if !is_template(path)
             && let Some(st) = self.session.active_mut()
@@ -72,6 +98,7 @@ impl PhotocraftApp {
             st.path = Some(path.to_string());
         }
         self.push_recent(path);
+        crate::home_ui::document_opened(self, path);
     }
 
     /// The name a file called `name` opens under: its own, or the first free "Untitled-N" for a

@@ -391,6 +391,10 @@ cargo run --release -p photocraft-ui-egui --example snapshot -- \
 ```
 
 `--script` is a list of control-protocol calls (`[method, params]`), applied in order.
+`--prefs preferences.json` starts from saved preferences (recent files, Home folders) and
+`--data-dir DIR` keeps Home's thumbnails in `DIR/thumbnails` like the settings folder; with
+`--settle-ms 3000` the background thumbnails are ready before the capture, e.g.
+`--prefs p.json --data-dir d --settle-ms 3000 --script '[["ui.set", {"home": "folder:flyers"}]]'`.
 Input calls (`ui.key`, `ui.type`, `ui.click`) now reply only after the app has processed the events,
 so a following `ui.inspect` observes their effect.
 

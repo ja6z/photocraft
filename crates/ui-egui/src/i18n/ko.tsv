@@ -2984,3 +2984,65 @@ fontWeight	Italic	기울임
 	Quick Selection found nothing there	빠른 선택으로 해당 위치에서 아무것도 찾지 못했습니다
 	Object Selection found nothing there — try a tighter rectangle	개체 선택으로 해당 위치에서 아무것도 찾지 못했습니다 — 더 좁은 사각형을 사용해 보세요
 	No subject found — try a rectangle around the object	피사체를 찾을 수 없습니다 — 개체 주위에 사각형을 그려 보세요
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Finder에서 보기
+	Show in Explorer	탐색기에서 보기
+	Show in Folder	폴더에서 보기
+	Folders	폴더
+	New Folder…	새 폴더…
+	New Folder	새 폴더
+	Rename Folder	폴더 이름 바꾸기
+	Folder Paths	폴더 경로
+	Folder Paths…	폴더 경로…
+	Folders keep a project's files together and set where they're saved.	폴더는 프로젝트의 파일을 한데 모으고 저장 위치를 정합니다.
+	This folder isn't on disk any more.	이 폴더는 더 이상 디스크에 없습니다.
+	Remove from Home	홈에서 제거
+homePage	Home	홈
+	Presets or a custom size	사전 설정 또는 사용자 정의 크기
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG 등
+	Recently opened	최근에 연 파일
+	No recent files yet	아직 최근 파일이 없습니다
+	Files you open or save show up here, newest first.	열거나 저장한 파일이 최신순으로 여기에 표시됩니다.
+	New Document Here…	여기에 새 문서…
+	Projects	프로젝트
+	Exports	내보내기
+	Resources	리소스
+	same as Projects	프로젝트와 같음
+	Click to choose another folder.	클릭하여 다른 폴더를 선택합니다.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	이 폴더는 더 이상 디스크에 없습니다. 위의 프로젝트에서 현재 위치를 선택하세요.
+	Files	파일
+	This folder is empty	이 폴더는 비어 있습니다
+	Save a document here, or add files to it from Recent.	여기에 문서를 저장하거나 최근 항목에서 파일을 추가하세요.
+	Showing files in the file manager isn't available here.	여기에서는 파일 관리자에서 파일을 표시할 수 없습니다.
+	Added {name} to the folder.	{name}을(를) 폴더에 추가했습니다.
+	{name} isn't there any more: it was moved, renamed or deleted.	{name}이(가) 더 이상 없습니다. 이동, 이름 변경 또는 삭제되었습니다.
+@plural	{n} file|{n} files	파일 {n}개
+	Opened just now	방금 열었음
+	Modified just now	방금 수정됨
+	Opened {n} min ago	{n}분 전에 열었음
+	Modified {n} min ago	{n}분 전에 수정됨
+	Opened today at {time}	오늘 {time}에 열었음
+	Modified today at {time}	오늘 {time}에 수정됨
+	Opened yesterday at {time}	어제 {time}에 열었음
+	Modified yesterday at {time}	어제 {time}에 수정됨
+	Opened {date}	{date}에 열었음
+	Modified {date}	{date}에 수정됨
+homeBadge	Open	열림
+	File missing	파일 없음
+	Remove {name} from Recent	최근 항목에서 {name} 제거
+	Remove from Recent	최근 항목에서 제거
+	Add to Folder	폴더에 추가
+	Remove from Folder	폴더에서 제거
+	Folder name	폴더 이름
+	No folder chosen	선택한 폴더 없음
+	For example: Flyers 2026	예: 전단지 2026
+	Change…	변경…
+	Choose…	선택…
+	Create a new folder in:	새 폴더를 만들 위치:
+	Use an existing folder:	기존 폴더 사용:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft는 파일을 옮기거나 삭제하지 않습니다. 홈에서 폴더를 제거하면 목록에서만 빠집니다.
+	Save As and Save a Copy start here (.psd, .pcraft).	다른 이름으로 저장과 사본 저장이 여기에서 시작됩니다(.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	다른 형식으로 내보내기, 빠른 내보내기, 웹용으로 저장이 여기에서 시작됩니다(PNG, JPEG 등).
+	Open and Place start here: photos, logos and other material.	열기와 가져오기가 여기에서 시작됩니다: 사진, 로고 및 기타 자료.
+	Same as Projects until you choose one.	선택하기 전까지는 프로젝트와 같습니다.

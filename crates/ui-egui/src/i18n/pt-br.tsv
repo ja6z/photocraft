@@ -2833,3 +2833,64 @@ fontWeight	Italic	Itálico
 	Quick Selection found nothing there	A Seleção rápida não encontrou nada ali
 	Object Selection found nothing there — try a tighter rectangle	A Seleção de objeto não encontrou nada ali — tente um retângulo mais justo
 	No subject found — try a rectangle around the object	Nenhum assunto encontrado — tente um retângulo ao redor do objeto
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Mostrar no Finder
+	Show in Explorer	Mostrar no Explorador
+	Show in Folder	Mostrar na pasta
+	Folders	Pastas
+	New Folder…	Nova pasta…
+	New Folder	Nova pasta
+	Rename Folder	Renomear pasta
+	Folder Paths	Caminhos da pasta
+	Folder Paths…	Caminhos da pasta…
+	Folders keep a project's files together and set where they're saved.	As pastas reúnem os arquivos de um projeto e definem onde eles são salvos.
+	This folder isn't on disk any more.	Esta pasta não está mais no disco.
+	Remove from Home	Remover do Início
+homePage	Home	Início
+	Presets or a custom size	Predefinições ou tamanho personalizado
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG e mais
+	Recently opened	Abertos recentemente
+	No recent files yet	Ainda não há arquivos recentes
+	Files you open or save show up here, newest first.	Os arquivos que você abrir ou salvar aparecem aqui, os mais recentes primeiro.
+	New Document Here…	Novo documento aqui…
+	Projects	Projetos
+	Exports	Exportações
+	Resources	Recursos
+	same as Projects	igual a Projetos
+	Click to choose another folder.	Clique para escolher outra pasta.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Esta pasta não está mais no disco. Indique onde ela está agora em Projetos, acima.
+	Files	Arquivos
+	This folder is empty	Esta pasta está vazia
+	Save a document here, or add files to it from Recent.	Salve um documento aqui ou adicione arquivos de Recentes.
+	Showing files in the file manager isn't available here.	Não é possível mostrar arquivos no gerenciador de arquivos aqui.
+	Added {name} to the folder.	{name} foi adicionado à pasta.
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} não está mais lá: foi movido, renomeado ou excluído.
+@plural	{n} file|{n} files	{n} arquivo|{n} arquivos
+	Opened just now	Aberto agora mesmo
+	Modified just now	Modificado agora mesmo
+	Opened {n} min ago	Aberto há {n} min
+	Modified {n} min ago	Modificado há {n} min
+	Opened today at {time}	Aberto hoje às {time}
+	Modified today at {time}	Modificado hoje às {time}
+	Opened yesterday at {time}	Aberto ontem às {time}
+	Modified yesterday at {time}	Modificado ontem às {time}
+	Opened {date}	Aberto em {date}
+	Modified {date}	Modificado em {date}
+homeBadge	Open	Aberto
+	File missing	Arquivo ausente
+	Remove {name} from Recent	Remover {name} de Recentes
+	Remove from Recent	Remover de Recentes
+	Add to Folder	Adicionar à pasta
+	Remove from Folder	Remover da pasta
+	Folder name	Nome da pasta
+	No folder chosen	Nenhuma pasta escolhida
+	For example: Flyers 2026	Por exemplo: Flyers 2026
+	Change…	Alterar…
+	Create a new folder in:	Criar uma nova pasta em:
+	Use an existing folder:	Usar uma pasta existente:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	O PhotoCraft nunca move nem exclui seus arquivos. Remover uma pasta do Início só a tira da lista.
+	Save As and Save a Copy start here (.psd, .pcraft).	Salvar como e Salvar uma cópia começam aqui (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	Exportar como, Exportação rápida e Salvar para a Web começam aqui (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	Abrir e Inserir começam aqui: fotos, logotipos e outros materiais.
+	Same as Projects until you choose one.	Igual a Projetos até você escolher uma.

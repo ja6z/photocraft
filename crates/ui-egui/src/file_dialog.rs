@@ -28,6 +28,9 @@ pub enum FileDialogRequest {
     Open { multiple: bool, initial_dir: Option<String>, extensions: Option<Vec<String>> },
     /// Where to write, starting from `suggested` (a file name, or the document's own path).
     Save { suggested: String },
+    /// A directory (Home's folder paths), starting in `initial_dir`. Answered with
+    /// [`FileDialogAnswer::Paths`] holding the one chosen directory.
+    Folder { initial_dir: Option<String> },
 }
 
 /// The user's choice (a cancelled dialog answers `None`).
@@ -98,6 +101,7 @@ impl PhotocraftApp {
         let kind = match request {
             FileDialogRequest::Open { .. } => "open",
             FileDialogRequest::Save { .. } => "save",
+            FileDialogRequest::Folder { .. } => "folder",
         };
         let then: Then = Box::new(move |app, answer| answer.map_or_else(|| Err(CANCELLED.into()), |a| then(app, a)));
         self.file_dialog = Some(Pending { request: Some(request), answer: None, then });
@@ -148,6 +152,26 @@ impl PhotocraftApp {
         then: impl FnOnce(&mut Self, String, Vec<u8>) -> Result<Value, String> + 'static,
     ) -> Result<Value, String> {
         let initial_dir = last_used_dir(&self.ui.recent_files);
+        self.pick_file_bytes_from(initial_dir, extensions, then)
+    }
+
+    /// [`Self::pick_file_bytes`] starting where a `kind` dialog starts on Home (File › Place starts
+    /// in the Resources path; see [`Self::dialog_dir`]), else in the last-used folder.
+    pub(crate) fn pick_file_bytes_in(
+        &mut self,
+        kind: photocraft_engine::home_cmds::DirKind,
+        then: impl FnOnce(&mut Self, String, Vec<u8>) -> Result<Value, String> + 'static,
+    ) -> Result<Value, String> {
+        let initial_dir = self.dialog_dir(kind).or_else(|| last_used_dir(&self.ui.recent_files));
+        self.pick_file_bytes_from(initial_dir, &[], then)
+    }
+
+    fn pick_file_bytes_from(
+        &mut self,
+        initial_dir: Option<String>,
+        extensions: &[&str],
+        then: impl FnOnce(&mut Self, String, Vec<u8>) -> Result<Value, String> + 'static,
+    ) -> Result<Value, String> {
         let extensions = (!extensions.is_empty()).then(|| extensions.iter().map(|s| (*s).to_string()).collect());
         self.ask_file(FileDialogRequest::Open { multiple: false, initial_dir, extensions }, move |app, answer| {
             let (name, bytes) = read_picked(answer)?;
@@ -156,11 +180,19 @@ impl PhotocraftApp {
     }
 
     /// File › Open: opens every chosen file, reporting each failure (see [`Self::open_paths`]).
+    /// The dialog starts in the Resources path of the folder shown on Home or of the active
+    /// document's folder, else in the active document's directory or the folder of the most
+    /// recently opened file (see [`Self::dialog_dir`]), else in the last-used folder. Files
+    /// opened from a folder shown on Home belong to that folder.
     pub fn open_dialog_file(&mut self) -> Result<Value, String> {
-        let initial_dir = last_used_dir(&self.ui.recent_files);
-        self.ask_file(FileDialogRequest::Open { multiple: true, initial_dir, extensions: None }, |app, answer| {
+        let initial_dir = self.dialog_dir(photocraft_engine::home_cmds::DirKind::Resources).or_else(|| last_used_dir(&self.ui.recent_files));
+        let folder = crate::home_ui::shown_folder(self);
+        self.ask_file(FileDialogRequest::Open { multiple: true, initial_dir, extensions: None }, move |app, answer| {
             match answer {
                 FileDialogAnswer::Paths(paths) => {
+                    if let Some(id) = folder {
+                        crate::home_ui::open_into(app, &paths, &id);
+                    }
                     app.open_paths(&paths);
                 }
                 FileDialogAnswer::Contents(name, bytes) => {
@@ -171,6 +203,19 @@ impl PhotocraftApp {
                 FileDialogAnswer::SaveTo(_) => return Err(UNEXPECTED.into()),
             }
             Ok(Value::Null)
+        })
+    }
+
+    /// Ask for a directory (Home's folder paths), starting in `initial_dir`: `then` gets the chosen
+    /// directory.
+    pub(crate) fn pick_folder(
+        &mut self,
+        initial_dir: Option<String>,
+        then: impl FnOnce(&mut Self, String) -> Result<Value, String> + 'static,
+    ) -> Result<Value, String> {
+        self.ask_file(FileDialogRequest::Folder { initial_dir }, move |app, answer| match answer {
+            FileDialogAnswer::Paths(dirs) => then(app, dirs.into_iter().next().ok_or(CANCELLED)?),
+            _ => Err(UNEXPECTED.into()),
         })
     }
 

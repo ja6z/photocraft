@@ -24,7 +24,7 @@ id = "UI-217-3"
 target = "File > Open starts in the last-used folder"
 status = "done"
 issue = 217
-note = "file_dialog.rs last_used_dir: open dialogs ask with initial_dir (the most recent file's folder) and apps services.rs passes it to rfd set_directory; open_starts_in_the_last_used_folder + last_used_dir_takes_the_most_recent_parent"
+note = "file_dialog.rs: open dialogs ask with initial_dir, Home's home_cmds::default_dir(Resources) (the Home folder shown or the active document's folder, else the active document's directory, else the folder of the most recently opened file that still exists) and else last_used_dir (the most recent file's folder); apps services.rs passes it to rfd set_directory; open_starts_in_the_last_used_folder + last_used_dir_takes_the_most_recent_parent + home_ui_tests.rs file_dialogs_start_in_the_folder_paths"
 
 [[item]]
 id = "UI-217-4"

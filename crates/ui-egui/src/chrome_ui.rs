@@ -17,6 +17,8 @@ pub struct ChromeState {
     /// Home screen shown over the open documents (Options bar › Home); holds the document count
     /// when it was opened, so opening or creating a document leaves it.
     pub home: Option<usize>,
+    /// The Home folder whose view Home shows (`None`: the start view with the recent files).
+    pub home_folder: Option<String>,
 }
 
 impl ChromeState {
@@ -29,7 +31,7 @@ impl ChromeState {
 
 impl Default for ChromeState {
     fn default() -> Self {
-        Self { status_info: "dimensions".into(), home: None }
+        Self { status_info: "dimensions".into(), home: None, home_folder: None }
     }
 }
 
@@ -174,7 +176,8 @@ pub fn home_button(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
     let on = app.ui.chrome.shows_home(n, auto);
     // With no documents and auto-show on, Home can't be dismissed (there's nothing behind it).
     let can_toggle = n > 0 || !auto;
-    if icons::button(ui, "house", 26.0, on && can_toggle, tl!("Home")).clicked() && can_toggle {
+    let size = if Tokens::get(ui.ctx()).pro { 26.0 } else { 28.0 };
+    if icons::button(ui, "house", size, on && can_toggle, tl!("Home")).clicked() && can_toggle {
         app.ui.chrome.home = if on { None } else { Some(n) };
     }
 }

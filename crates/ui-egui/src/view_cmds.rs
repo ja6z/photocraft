@@ -855,7 +855,8 @@ fn front(app: &mut PhotocraftApp, id: &str, params: &Value) -> Option<Result<Val
                 Err(e) => return Some(Err(e)),
             };
             let linked = id == "file.placeLinked";
-            Some(app.pick_file_bytes(move |app, name, bytes| {
+            // Starts in the Resources path of the document's Home folder (see `dialog_dir`).
+            Some(app.pick_file_bytes_in(photocraft_engine::home_cmds::DirKind::Resources, move |app, name, bytes| {
                 app.refocus(doc)?;
                 let linked = linked.then(|| name.clone());
                 app.place_bytes(&name, bytes, linked)
@@ -1045,7 +1046,8 @@ fn front(app: &mut PhotocraftApp, id: &str, params: &Value) -> Option<Result<Val
 fn save_a_copy(app: &mut PhotocraftApp) -> Result<Value, String> {
     let doc = app.session.active().ok_or("no document")?.doc.clone();
     let stem = doc.name.rsplit_once('.').map_or(doc.name.as_str(), |(a, _)| a);
-    let suggested = format!("{stem} copy.psd");
+    // In the Projects path of the document's Home folder, else beside the document.
+    let suggested = app.suggest_in(photocraft_engine::home_cmds::DirKind::Projects, &format!("{stem} copy.psd"));
     // The copy is of the document as it was when asked.
     app.pick_save(&suggested, move |app, path| {
         let export = app.services.export.as_ref().ok_or("no exporter configured")?;

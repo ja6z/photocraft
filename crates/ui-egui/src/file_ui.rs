@@ -515,6 +515,8 @@ fn web_confirm(app: &mut PhotocraftApp, f: &Map<String, Value>) -> Result<Value,
     let st = WebSettings::from_params(&p, "file.export.saveForWebLegacy").map_err(|e| e.to_string())?;
     let base = photocraft_doc::slices::base_name(&doc);
     let suggested = if has_slices && html { format!("{base}.html") } else { format!("{base}.{}", st.format.ext()) };
+    // In the Exports path of the document's Home folder, else beside the document.
+    let suggested = app.suggest_in(photocraft_engine::home_cmds::DirKind::Exports, &suggested);
     app.pick_save(&suggested, move |app, path| {
         app.refocus(doc.id)?;
         if has_slices {

@@ -75,6 +75,9 @@ pub mod gpu_canvas;
 pub mod gpu_status;
 pub mod gradient_ui;
 pub mod hold_keys;
+mod home_cards;
+mod home_dialogs;
+pub mod home_ui;
 pub mod i18n;
 mod icon_data;
 pub mod icons;
@@ -212,6 +215,8 @@ impl Default for ExportSettings {
 
 /// Encode a document: (file bytes, warnings about anything approximated or dropped).
 pub type ExportFn = Box<dyn Fn(&Document, &str, &ExportSettings) -> Result<(Vec<u8>, Vec<String>), String>>;
+/// Show a file or folder in the system file manager (Finder, Explorer).
+pub type RevealFn = Box<dyn Fn(&str) -> Result<(), String>>;
 pub type WriteFn = Box<dyn FnMut(&str, &[u8]) -> Result<(), String>>;
 /// Encode a document and write it to a path, reporting the stage to the job; returns the export
 /// warnings. Runs on a worker thread (see [`Services::save_file`]). It must call
@@ -285,8 +290,13 @@ pub struct Services {
     pub import: Option<ImportFn>,
     /// Encode a document for a file name (format chosen by extension).
     pub export: Option<ExportFn>,
-    /// Show an Open or Save dialog without waiting for it (see `file_dialog`).
+    /// Show an Open, Save or folder dialog without waiting for it (see `file_dialog`).
     pub file_dialog: Option<FileDialogFn>,
+    /// Show a path in the system file manager (Home's Show in Finder).
+    pub reveal: Option<RevealFn>,
+    /// The local time zone's offset from UTC, in seconds, at a Unix time (Home's "today 14:05").
+    /// Without it times read as UTC.
+    pub local_offset: Option<fn(i64) -> i32>,
     /// Write bytes to a path (native) or trigger a download (web).
     pub write: Option<WriteFn>,
     /// Encode and write in one step on a worker thread, so a large save doesn't freeze the
@@ -296,6 +306,12 @@ pub struct Services {
     /// using `file_dialog` and `write` with the user's authority.
     pub automation_read: Option<AutomationReadFn>,
     pub automation_write: Option<AutomationWriteFn>,
+    /// The folders behind [`Self::automation_read`] and [`Self::automation_write`], as absolute
+    /// paths. A file an agent opens or saves (by a root-relative path) is recorded where it
+    /// really is, so Open Recent, Home and File › Save find it. Without them the document keeps
+    /// the root-relative path.
+    pub automation_read_root: Option<std::path::PathBuf>,
+    pub automation_write_root: Option<std::path::PathBuf>,
     pub automation_command: Option<AutomationCommandFn>,
     /// Same policy as [`Self::automation_command`], as a function pointer the engine calls for
     /// each step of `actions.play`. Installed on the session only while a control request or
@@ -564,6 +580,8 @@ pub struct PhotocraftApp {
     pub background_jobs: bool,
     /// Background job bookkeeping: opening tabs, control replies waiting on a job.
     pub jobs: jobs_ui::JobsUi,
+    /// Home page caches, thumbnail textures and the thumbnail worker (see `home_ui`).
+    pub home: home_ui::Runtime,
     #[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
     live_tokens: theme::live::LiveTokens,
 }
@@ -668,6 +686,7 @@ impl PhotocraftApp {
             stylus: Default::default(),
             background_jobs: false,
             jobs: Default::default(),
+            home: Default::default(),
             #[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
             live_tokens: theme::live::LiveTokens::from_env(),
         };
@@ -896,20 +915,22 @@ impl PhotocraftApp {
     /// first, capped at Preferences › File Handling › Recent File List Contains. The list lives in
     /// the preferences (`fileHandling.recentFiles`), so it survives a restart; `ui.recent_files`
     /// mirrors it for the menus and the Home screen.
+    /// The file is dated as just opened, so Home lists it first.
     pub fn push_recent(&mut self, path: &str) {
-        let cap = self.recent_cap();
-        let mut r = self.session.prefs().file_handling.recent_files.clone();
-        r.retain(|p| p != path);
-        r.insert(0, path.to_string());
-        r.truncate(cap);
-        self.ui.recent_files = r.clone();
-        self.session.prefs.edit(|p| p.file_handling.recent_files = r);
+        self.note_recent(path, photocraft_engine::home_cmds::Stamp::Opened);
+    }
+
+    /// [`push_recent`](Self::push_recent) with how to date the file (a save dates only a file
+    /// with no open time yet).
+    pub(crate) fn note_recent(&mut self, path: &str, stamp: photocraft_engine::home_cmds::Stamp) {
+        photocraft_engine::home_cmds::note_recent(&mut self.session, path, stamp, photocraft_engine::home_cmds::unix_now());
+        self.ui.recent_files = self.session.prefs().file_handling.recent_files.clone();
     }
 
     /// File › Open Recent › Clear Recent File List.
     pub fn clear_recent(&mut self) {
         self.ui.recent_files.clear();
-        self.session.prefs.edit(|p| p.file_handling.recent_files.clear());
+        photocraft_engine::home_cmds::clear_recent(&mut self.session);
     }
 
     /// How many recent files to remember ("Recent File List Contains", 0–100).
@@ -1008,6 +1029,23 @@ impl PhotocraftApp {
         Ok(warnings)
     }
 
+    /// Where a file dialog of `kind` starts: the folder shown on Home, else the active document's
+    /// Home folder, else its own directory, else the last folder a file was opened from
+    /// (`home.defaultDir`). `None` leaves it to the caller's fallback.
+    pub(crate) fn dialog_dir(&self, kind: photocraft_engine::home_cmds::DirKind) -> Option<String> {
+        let folder = home_ui::shown_folder(self);
+        photocraft_engine::home_cmds::default_dir(&self.session, kind, folder.as_deref())
+    }
+
+    /// A save dialog's suggestion: `name` in the directory a `kind` dialog starts in, or the bare
+    /// name when there is none ([`Self::pick_save`] then starts it beside the active document).
+    pub(crate) fn suggest_in(&self, kind: photocraft_engine::home_cmds::DirKind, name: &str) -> String {
+        match self.dialog_dir(kind) {
+            Some(dir) => std::path::Path::new(&dir).join(name).to_string_lossy().into_owned(),
+            None => name.to_string(),
+        }
+    }
+
     /// Save the active document to `path`, or to a path chosen in the save dialog (which
     /// continues on a later frame, see `file_dialog`). Returns `{"path", "warnings"}` (the export
     /// warnings are also shown to the user).
@@ -1050,6 +1088,8 @@ impl PhotocraftApp {
             }
         };
         let doc = st.doc.id;
+        // In the document's Home folder (its Projects path), else beside it (see `dialog_dir`).
+        let suggested = self.suggest_in(photocraft_engine::home_cmds::DirKind::Projects, &file_open::display_name(&suggested));
         self.pick_save(&suggested, move |app, path| app.with_document(doc, |app| app.save_to(path)))
     }
 
@@ -1101,6 +1141,11 @@ impl PhotocraftApp {
                     // The job locked the document, but record the revision that was written.
                     st.saved_revision = revision;
                 }
+                // Home: the saved file is a recent one, with a fresh thumbnail.
+                app.note_recent(path, photocraft_engine::home_cmds::Stamp::Saved);
+                if let Some(i) = app.session.active_index() {
+                    home_ui::queue_document_thumbnail(app, i);
+                }
                 // "Save Document" script events and File › Generate › Image Assets.
                 if let Some(i) = app.session.active_index()
                     && let Some(r) = photocraft_engine::automate_cmds::document_saved(&mut app.session, i)
@@ -1125,16 +1170,29 @@ impl PhotocraftApp {
     /// written and the export warnings (also shown to the user).
     pub fn save_automation(&mut self, path: Option<String>) -> Result<(String, Vec<String>), String> {
         let state = self.session.active().ok_or("no document")?;
-        // As File › Save: without `path` only a layered file is written back (#416).
-        let target = path
-            .or_else(|| state.path.clone().filter(|p| photocraft_engine::file_cmds::saves_in_place(p)))
-            .ok_or("pass `path`: a save without one writes back only to the document's own PSD, PSB or .pcraft file")?;
+        let write_root = self.services.automation_write_root.as_deref();
+        // As File › Save: without `path` only a layered file is written back (#416). The
+        // document's own path is absolute once the roots are known; the writer takes it
+        // relative to the write root.
+        let target = match path {
+            Some(path) => path,
+            None => {
+                let own = state
+                    .path
+                    .clone()
+                    .filter(|p| photocraft_engine::file_cmds::saves_in_place(p))
+                    .ok_or("pass `path`: a save without one writes back only to the document's own PSD, PSB or .pcraft file")?;
+                file_open::automation_relative(&own, write_root)
+                    .ok_or_else(|| format!("pass `path`: the document's file `{own}` is outside the automation write root"))?
+            }
+        };
+        let location = file_open::automation_location(write_root, &target);
         let export = self.services.export.as_ref().ok_or("no exporter configured")?;
         let (bytes, warnings) = export(&state.doc, &target, &ExportSettings::default())?;
         let write = self.services.automation_write.as_mut().ok_or("automation write authority is not configured")?;
         write(&target, &bytes)?;
         if let Some(state) = self.session.active_mut() {
-            state.saved_to(target.clone());
+            state.saved_to(location);
         }
         self.ui.status = format!("Saved {target}");
         self.ui.status_error = false;
@@ -1352,10 +1410,12 @@ impl eframe::App for PhotocraftApp {
         if chrome && self.ui.panels.status_bar {
             panels::status_bar(self, ui);
         }
-        if chrome && self.ui.panels.toolbar {
+        // Home covers the window under the menus and options bar, like Photoshop's.
+        let home = home_ui::shown(self);
+        if chrome && self.ui.panels.toolbar && !home {
             panels::toolbar(self, ui);
         }
-        if chrome && self.ui.panels.dock {
+        if chrome && self.ui.panels.dock && !home {
             panels::right_dock(self, ui);
         }
         let t = theme::Tokens::get(&ctx);

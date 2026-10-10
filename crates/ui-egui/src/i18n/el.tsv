@@ -3514,3 +3514,63 @@ fontWeight	Thin	Πολύ λεπτά
 	Quick Selection found nothing there	Η Γρήγορη επιλογή δεν βρήκε τίποτα εκεί
 	Object Selection found nothing there — try a tighter rectangle	Η Επιλογή αντικειμένου δεν βρήκε τίποτα εκεί — δοκιμάστε ένα πιο στενό ορθογώνιο
 	No subject found — try a rectangle around the object	Δεν βρέθηκε θέμα — δοκιμάστε ένα ορθογώνιο γύρω από το αντικείμενο
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Εμφάνιση στο Finder
+	Show in Explorer	Εμφάνιση στην Εξερεύνηση
+	Show in Folder	Εμφάνιση στον φάκελο
+	Folders	Φάκελοι
+	New Folder…	Νέος φάκελος…
+	New Folder	Νέος φάκελος
+	Rename Folder	Μετονομασία φακέλου
+	Folder Paths	Διαδρομές φακέλου
+	Folder Paths…	Διαδρομές φακέλου…
+	Folders keep a project's files together and set where they're saved.	Οι φάκελοι κρατούν μαζί τα αρχεία ενός έργου και ορίζουν πού αποθηκεύονται.
+	This folder isn't on disk any more.	Αυτός ο φάκελος δεν υπάρχει πια στον δίσκο.
+	Remove from Home	Αφαίρεση από την Αρχική
+homePage	Home	Αρχική
+	Presets or a custom size	Προεπιλογές ή προσαρμοσμένο μέγεθος
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG και άλλα
+	Recently opened	Ανοίχτηκαν πρόσφατα
+	No recent files yet	Δεν υπάρχουν ακόμη πρόσφατα αρχεία
+	Files you open or save show up here, newest first.	Τα αρχεία που ανοίγετε ή αποθηκεύετε εμφανίζονται εδώ, πρώτα τα νεότερα.
+	New Document Here…	Νέο έγγραφο εδώ…
+	Projects	Έργα
+	Exports	Εξαγωγές
+	Resources	Πόροι
+	same as Projects	ίδιο με τα Έργα
+	Click to choose another folder.	Κάντε κλικ για να επιλέξετε άλλον φάκελο.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Αυτός ο φάκελος δεν υπάρχει πια στον δίσκο. Επιλέξτε πού βρίσκεται τώρα από τα Έργα παραπάνω.
+	Files	Αρχεία
+	This folder is empty	Αυτός ο φάκελος είναι κενός
+	Save a document here, or add files to it from Recent.	Αποθηκεύστε εδώ ένα έγγραφο ή προσθέστε αρχεία από τα Πρόσφατα.
+	Showing files in the file manager isn't available here.	Η εμφάνιση αρχείων στη διαχείριση αρχείων δεν είναι διαθέσιμη εδώ.
+	Added {name} to the folder.	Το {name} προστέθηκε στον φάκελο.
+	{name} isn't there any more: it was moved, renamed or deleted.	Το {name} δεν βρίσκεται πια εκεί: μετακινήθηκε, μετονομάστηκε ή διαγράφηκε.
+@plural	{n} file|{n} files	{n} αρχείο|{n} αρχεία
+	Opened just now	Άνοιξε μόλις τώρα
+	Modified just now	Τροποποιήθηκε μόλις τώρα
+	Opened {n} min ago	Άνοιξε πριν από {n} λεπτά
+	Modified {n} min ago	Τροποποιήθηκε πριν από {n} λεπτά
+	Opened today at {time}	Άνοιξε σήμερα στις {time}
+	Modified today at {time}	Τροποποιήθηκε σήμερα στις {time}
+	Opened yesterday at {time}	Άνοιξε χθες στις {time}
+	Modified yesterday at {time}	Τροποποιήθηκε χθες στις {time}
+	Opened {date}	Άνοιξε στις {date}
+	Modified {date}	Τροποποιήθηκε στις {date}
+homeBadge	Open	Ανοιχτό
+	File missing	Το αρχείο λείπει
+	Remove {name} from Recent	Αφαίρεση του {name} από τα Πρόσφατα
+	Remove from Recent	Αφαίρεση από τα Πρόσφατα
+	Add to Folder	Προσθήκη σε φάκελο
+	Remove from Folder	Αφαίρεση από τον φάκελο
+	Folder name	Όνομα φακέλου
+	No folder chosen	Δεν επιλέχθηκε φάκελος
+	For example: Flyers 2026	Για παράδειγμα: Φυλλάδια 2026
+	Create a new folder in:	Δημιουργία νέου φακέλου στο:
+	Use an existing folder:	Χρήση υπάρχοντος φακέλου:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	Το PhotoCraft δεν μετακινεί ούτε διαγράφει ποτέ τα αρχεία σας. Η αφαίρεση ενός φακέλου από την Αρχική απλώς τον βγάζει από τη λίστα.
+	Save As and Save a Copy start here (.psd, .pcraft).	Η Αποθήκευση ως και η Αποθήκευση αντιγράφου ξεκινούν εδώ (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	Η Εξαγωγή ως, η Γρήγορη εξαγωγή και η Αποθήκευση για ιστό ξεκινούν εδώ (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	Το Άνοιγμα και η Τοποθέτηση ξεκινούν εδώ: φωτογραφίες, λογότυπα και άλλο υλικό.
+	Same as Projects until you choose one.	Ίδιο με τα Έργα μέχρι να επιλέξετε άλλον.

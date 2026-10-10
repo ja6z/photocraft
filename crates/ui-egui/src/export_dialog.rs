@@ -247,7 +247,8 @@ pub fn confirm(app: &mut PhotocraftApp, f: &Map<String, Value>) -> Result<Value,
     let doc = source_document(app, f)?;
     let stem = doc.name.rsplit_once('.').map_or(doc.name.as_str(), |(a, _)| a).to_string();
     let ext = s_fmt(f);
-    let suggested = format!("{stem}.{ext}");
+    // In the Exports path of the document's Home folder, else beside the document.
+    let suggested = app.suggest_in(photocraft_engine::home_cmds::DirKind::Exports, &format!("{stem}.{ext}"));
     let (f, settings) = (f.clone(), settings(f));
     app.pick_save(&suggested, move |app, path| {
         let out = export_document(&doc, &f, None)?;
@@ -276,7 +277,9 @@ pub fn quick_export_png(app: &mut PhotocraftApp) -> Result<Value, String> {
         }
         let st = app.session.active().ok_or("no document")?;
         let stem = st.doc.name.rsplit_once('.').map_or(st.doc.name.as_str(), |(a, _)| a);
-        let (suggested, doc) = (format!("{stem}.{fmt}"), st.doc.id);
+        let (name, doc) = (format!("{stem}.{fmt}"), st.doc.id);
+        // In the Exports path of the document's Home folder, else beside the document.
+        let suggested = app.suggest_in(photocraft_engine::home_cmds::DirKind::Exports, &name);
         return app.pick_save(&suggested, move |app, path| {
             app.refocus(doc)?;
             quick_export(app, json!({"path": path}))

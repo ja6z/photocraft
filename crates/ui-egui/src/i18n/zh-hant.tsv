@@ -2383,3 +2383,65 @@ fontWeight	Italic	斜體
 	Quick Selection found nothing there	快速選取在該處找不到任何內容
 	Object Selection found nothing there — try a tighter rectangle	物件選取在該處找不到任何內容 — 請嘗試更緊密的矩形
 	No subject found — try a rectangle around the object	找不到主體 — 請嘗試在物件周圍繪製矩形
+
+# Home (start page): recent files and project folders.
+	Show in Finder	在 Finder 中顯示
+	Show in Explorer	在檔案總管中顯示
+	Show in Folder	在資料夾中顯示
+	Folders	資料夾
+	New Folder…	新增資料夾…
+	New Folder	新增資料夾
+	Rename Folder	重新命名資料夾
+	Folder Paths	資料夾路徑
+	Folder Paths…	資料夾路徑…
+	Folders keep a project's files together and set where they're saved.	資料夾把一個專案的檔案集中在一起，並決定它們儲存的位置。
+	This folder isn't on disk any more.	此資料夾已不在磁碟上。
+	Remove from Home	從首頁移除
+homePage	Home	首頁
+	Presets or a custom size	預設集或自訂尺寸
+	PSD, PhotoCraft, PNG, JPEG and more	PSD、PhotoCraft、PNG、JPEG 等
+	Recently opened	最近開啟
+	No recent files yet	尚無最近使用的檔案
+	Files you open or save show up here, newest first.	你開啟或儲存的檔案會依從新到舊的順序顯示在這裡。
+	New Document Here…	在此新增文件…
+	Projects	專案
+	Exports	匯出
+	Resources	素材
+	same as Projects	同專案
+	Click to choose another folder.	按一下以選擇其他資料夾。
+	This folder isn't on disk any more. Choose where it is now with Projects above.	此資料夾已不在磁碟上。請在上方的「專案」中選擇它現在的位置。
+	Files	檔案
+	This folder is empty	此資料夾是空的
+	Save a document here, or add files to it from Recent.	在此儲存文件，或從最近開啟的檔案中加入。
+	Showing files in the file manager isn't available here.	此處無法在檔案管理員中顯示檔案。
+	Added {name} to the folder.	已將 {name} 加入資料夾。
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} 已不在原處：它已被移動、重新命名或刪除。
+@plural	{n} file|{n} files	{n} 個檔案
+	Opened just now	剛剛開啟
+	Modified just now	剛剛修改
+	Opened {n} min ago	{n} 分鐘前開啟
+	Modified {n} min ago	{n} 分鐘前修改
+	Opened today at {time}	今天 {time} 開啟
+	Modified today at {time}	今天 {time} 修改
+	Opened yesterday at {time}	昨天 {time} 開啟
+	Modified yesterday at {time}	昨天 {time} 修改
+	Opened {date}	{date} 開啟
+	Modified {date}	{date} 修改
+homeBadge	Open	已開啟
+	File missing	檔案遺失
+	Remove {name} from Recent	從最近開啟中移除 {name}
+	Remove from Recent	從最近開啟中移除
+	Add to Folder	加入資料夾
+	Remove from Folder	從資料夾中移除
+	Folder name	資料夾名稱
+	No folder chosen	未選擇資料夾
+	For example: Flyers 2026	例如：傳單 2026
+	Change…	變更…
+	Choose…	選擇…
+	Create a new folder in:	在以下位置新增資料夾：
+	Use an existing folder:	使用現有資料夾：
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft 絕不會移動或刪除你的檔案。從首頁移除資料夾只會把它從清單中拿掉。
+	Save As and Save a Copy start here (.psd, .pcraft).	「另存新檔」和「儲存拷貝」從這裡開始（.psd、.pcraft）。
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	「匯出為」、快速匯出和「儲存為網頁用」從這裡開始（PNG、JPEG 等）。
+	Open and Place start here: photos, logos and other material.	「開啟」和「置入」從這裡開始：照片、標誌和其他素材。
+	Same as Projects until you choose one.	在你選擇之前與專案相同。

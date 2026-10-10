@@ -2406,3 +2406,65 @@ fontWeight	Italic	Kurzíva
 	Quick Selection found nothing there	Rychlý výběr zde nic nenašel
 	Object Selection found nothing there — try a tighter rectangle	Výběr objektu zde nic nenašel — zkuste těsnější obdélník
 	No subject found — try a rectangle around the object	Nebyl nalezen žádný objekt — zkuste obdélník kolem objektu
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Zobrazit ve Finderu
+	Show in Explorer	Zobrazit v Průzkumníkovi
+	Show in Folder	Zobrazit ve složce
+	Folders	Složky
+	New Folder…	Nová složka…
+	New Folder	Nová složka
+	Rename Folder	Přejmenovat složku
+	Folder Paths	Cesty složky
+	Folder Paths…	Cesty složky…
+	Folders keep a project's files together and set where they're saved.	Složky drží soubory projektu pohromadě a určují, kam se ukládají.
+	This folder isn't on disk any more.	Tato složka už na disku není.
+	Remove from Home	Odebrat z Domů
+homePage	Home	Domů
+	Presets or a custom size	Předvolby nebo vlastní velikost
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG a další
+	Recently opened	Nedávno otevřené
+	No recent files yet	Zatím žádné nedávné soubory
+	Files you open or save show up here, newest first.	Soubory, které otevřete nebo uložíte, se zobrazí zde, nejnovější první.
+	New Document Here…	Nový dokument zde…
+	Projects	Projekty
+	Exports	Exporty
+	Resources	Podklady
+	same as Projects	stejné jako Projekty
+	Click to choose another folder.	Klepnutím vyberete jinou složku.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Tato složka už na disku není. Nahoře v Projektech zvolte, kde je teď.
+	Files	Soubory
+	This folder is empty	Tato složka je prázdná
+	Save a document here, or add files to it from Recent.	Uložte sem dokument nebo sem přidejte soubory z nedávných.
+	Showing files in the file manager isn't available here.	Zobrazení souborů ve správci souborů zde není k dispozici.
+	Added {name} to the folder.	Soubor {name} byl přidán do složky.
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} už tam není: byl přesunut, přejmenován nebo smazán.
+@plural	{n} file|{n} files	{n} soubor|{n} soubory|{n} souborů
+	Opened just now	Otevřeno právě teď
+	Modified just now	Změněno právě teď
+	Opened {n} min ago	Otevřeno před {n} min
+	Modified {n} min ago	Změněno před {n} min
+	Opened today at {time}	Otevřeno dnes v {time}
+	Modified today at {time}	Změněno dnes v {time}
+	Opened yesterday at {time}	Otevřeno včera v {time}
+	Modified yesterday at {time}	Změněno včera v {time}
+	Opened {date}	Otevřeno {date}
+	Modified {date}	Změněno {date}
+homeBadge	Open	Otevřeno
+	File missing	Soubor chybí
+	Remove {name} from Recent	Odebrat {name} z nedávných
+	Remove from Recent	Odebrat z nedávných
+	Add to Folder	Přidat do složky
+	Remove from Folder	Odebrat ze složky
+	Folder name	Název složky
+	No folder chosen	Není vybrána žádná složka
+	For example: Flyers 2026	Například: Letáky 2026
+	Change…	Změnit…
+	Choose…	Vybrat…
+	Create a new folder in:	Vytvořit novou složku v:
+	Use an existing folder:	Použít existující složku:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft nikdy nepřesouvá ani nemaže vaše soubory. Odebráním složky z Domů ji jen odstraníte ze seznamu.
+	Save As and Save a Copy start here (.psd, .pcraft).	Uložit jako a Uložit kopii začínají zde (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	Exportovat jako, Rychlý export a Uložit pro web začínají zde (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	Otevřít a Umístit začínají zde: fotky, loga a další podklady.
+	Same as Projects until you choose one.	Stejné jako Projekty, dokud nějakou nevyberete.

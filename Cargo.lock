@@ -4177,6 +4177,7 @@ version = "0.6.0"
 dependencies = [
  "arboard",
  "async-io",
+ "chrono",
  "core-graphics2",
  "dispatch2",
  "eframe",

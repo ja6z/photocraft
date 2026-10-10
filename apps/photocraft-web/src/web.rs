@@ -353,7 +353,8 @@ fn services(inbox: Inbox) -> Services {
             photocraft_io::export(doc, path, &opts).map(|r| (r.bytes, r.warnings)).map_err(|e| e.to_string())
         })),
         file_dialog: Some(Box::new(|request, _parent, reply| match request {
-            // The browser's file picker hands over the file's contents, not a path.
+            // The browser's file picker hands over the file's contents, not a path. Browsers
+            // don't let a page choose where the picker starts.
             FileDialogRequest::Open { extensions, .. } => wasm_bindgen_futures::spawn_local(async move {
                 let dialog = if let Some(exts) = extensions {
                     rfd::AsyncFileDialog::new().add_filter("Supported Files", &exts)
@@ -372,6 +373,8 @@ fn services(inbox: Inbox) -> Services {
                 let name = std::path::Path::new(&suggested).file_name().map_or_else(|| suggested.clone(), |n| n.to_string_lossy().to_string());
                 reply.send(Some(FileDialogAnswer::SaveTo(name)));
             }
+            // No folders on the web (Home has none): nothing to pick.
+            FileDialogRequest::Folder { .. } => reply.send(None),
         })),
         write: Some(Box::new(|path: &str, bytes: &[u8]| download(path, bytes))),
         encode_png: Some(Box::new(|w, h, rgba| {

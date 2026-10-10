@@ -3426,3 +3426,64 @@ fontWeight	Italic	斜体
 	Quick Selection found nothing there	クイック選択ではそこに何も見つかりませんでした
 	Object Selection found nothing there — try a tighter rectangle	オブジェクト選択ではそこに何も見つかりませんでした — より狭い長方形で試してください
 	No subject found — try a rectangle around the object	被写体が見つかりません — オブジェクトを囲む長方形を試してください
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Finder で表示
+	Show in Explorer	エクスプローラーで表示
+	Show in Folder	フォルダーで表示
+	Folders	フォルダー
+	New Folder…	新規フォルダー…
+	New Folder	新規フォルダー
+	Rename Folder	フォルダー名を変更
+	Folder Paths	フォルダーのパス
+	Folder Paths…	フォルダーのパス…
+	Folders keep a project's files together and set where they're saved.	フォルダーはプロジェクトのファイルをまとめ、保存先を決めます。
+	This folder isn't on disk any more.	このフォルダーはディスク上にもうありません。
+	Remove from Home	ホームから削除
+homePage	Home	ホーム
+	Presets or a custom size	プリセットまたはカスタムサイズ
+	PSD, PhotoCraft, PNG, JPEG and more	PSD、PhotoCraft、PNG、JPEG など
+	Recently opened	最近開いたファイル
+	No recent files yet	最近使ったファイルはまだありません
+	Files you open or save show up here, newest first.	開いたり保存したりしたファイルが、新しい順にここに表示されます。
+	New Document Here…	ここに新規ドキュメント…
+	Projects	プロジェクト
+	Exports	書き出し
+	Resources	素材
+	same as Projects	プロジェクトと同じ
+	Click to choose another folder.	クリックして別のフォルダーを選択します。
+	This folder isn't on disk any more. Choose where it is now with Projects above.	このフォルダーはディスク上にもうありません。上の「プロジェクト」で現在の場所を選んでください。
+	Files	ファイル
+	This folder is empty	このフォルダーは空です
+	Save a document here, or add files to it from Recent.	ここにドキュメントを保存するか、最近開いたファイルから追加します。
+	Showing files in the file manager isn't available here.	ここではファイルマネージャーでファイルを表示できません。
+	Added {name} to the folder.	{name} をフォルダーに追加しました。
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} はもうありません。移動、名前の変更、または削除されました。
+@plural	{n} file|{n} files	{n} 個のファイル
+	Opened just now	たった今開きました
+	Modified just now	たった今変更されました
+	Opened {n} min ago	{n} 分前に開きました
+	Modified {n} min ago	{n} 分前に変更されました
+	Opened today at {time}	今日 {time} に開きました
+	Modified today at {time}	今日 {time} に変更されました
+	Opened yesterday at {time}	昨日 {time} に開きました
+	Modified yesterday at {time}	昨日 {time} に変更されました
+	Opened {date}	{date} に開きました
+	Modified {date}	{date} に変更されました
+homeBadge	Open	開いています
+	File missing	ファイルが見つかりません
+	Remove {name} from Recent	{name} を最近開いたファイルから削除
+	Remove from Recent	最近開いたファイルから削除
+	Add to Folder	フォルダーに追加
+	Remove from Folder	フォルダーから削除
+	Folder name	フォルダー名
+	No folder chosen	フォルダーが選択されていません
+	For example: Flyers 2026	例: チラシ 2026
+	Change…	変更…
+	Create a new folder in:	新しいフォルダーの作成先:
+	Use an existing folder:	既存のフォルダーを使用:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft がファイルを移動したり削除したりすることはありません。ホームからフォルダーを削除しても、一覧から外れるだけです。
+	Save As and Save a Copy start here (.psd, .pcraft).	「名前を付けて保存」と「コピーを保存」はここから始まります（.psd、.pcraft）。
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	「書き出し形式を指定」、クイック書き出し、「Web 用に保存」はここから始まります（PNG、JPEG など）。
+	Open and Place start here: photos, logos and other material.	「開く」と「配置」はここから始まります：写真、ロゴ、その他の素材。
+	Same as Projects until you choose one.	選ぶまではプロジェクトと同じです。

@@ -3426,3 +3426,64 @@ cameraRaw	Roughness	Chropowatość
 	Quick Selection found nothing there	Szybkie zaznaczanie nic tam nie znalazło
 	Object Selection found nothing there — try a tighter rectangle	Zaznaczanie obiektu nic tam nie znalazło — spróbuj ciaśniejszego prostokąta
 	No subject found — try a rectangle around the object	Nie znaleziono obiektu — spróbuj prostokąta wokół obiektu
+
+# Home (start page): recent files and project folders.
+	Show in Finder	Pokaż w Finderze
+	Show in Explorer	Pokaż w Eksploratorze
+	Show in Folder	Pokaż w folderze
+	Folders	Foldery
+	New Folder…	Nowy folder…
+	New Folder	Nowy folder
+	Rename Folder	Zmień nazwę folderu
+	Folder Paths	Ścieżki folderu
+	Folder Paths…	Ścieżki folderu…
+	Folders keep a project's files together and set where they're saved.	Foldery trzymają pliki projektu razem i określają, gdzie są zapisywane.
+	This folder isn't on disk any more.	Tego folderu nie ma już na dysku.
+	Remove from Home	Usuń ze strony Start
+homePage	Home	Start
+	Presets or a custom size	Ustawienia predefiniowane lub własny rozmiar
+	PSD, PhotoCraft, PNG, JPEG and more	PSD, PhotoCraft, PNG, JPEG i inne
+	Recently opened	Ostatnio otwierane
+	No recent files yet	Brak ostatnio otwieranych plików
+	Files you open or save show up here, newest first.	Pliki, które otworzysz lub zapiszesz, pojawią się tutaj, od najnowszych.
+	New Document Here…	Nowy dokument tutaj…
+	Projects	Projekty
+	Exports	Eksporty
+	Resources	Zasoby
+	same as Projects	jak Projekty
+	Click to choose another folder.	Kliknij, aby wybrać inny folder.
+	This folder isn't on disk any more. Choose where it is now with Projects above.	Tego folderu nie ma już na dysku. Wskaż jego nowe miejsce w polu Projekty powyżej.
+	Files	Pliki
+	This folder is empty	Ten folder jest pusty
+	Save a document here, or add files to it from Recent.	Zapisz tu dokument lub dodaj pliki z ostatnio otwieranych.
+	Showing files in the file manager isn't available here.	Pokazywanie plików w menedżerze plików nie jest tu dostępne.
+	Added {name} to the folder.	Dodano {name} do folderu.
+	{name} isn't there any more: it was moved, renamed or deleted.	{name} już tam nie ma: plik przeniesiono, zmieniono jego nazwę lub go usunięto.
+@plural	{n} file|{n} files	{n} plik|{n} pliki|{n} plików
+	Opened just now	Otwarto przed chwilą
+	Modified just now	Zmieniono przed chwilą
+	Opened {n} min ago	Otwarto {n} min temu
+	Modified {n} min ago	Zmieniono {n} min temu
+	Opened today at {time}	Otwarto dziś o {time}
+	Modified today at {time}	Zmieniono dziś o {time}
+	Opened yesterday at {time}	Otwarto wczoraj o {time}
+	Modified yesterday at {time}	Zmieniono wczoraj o {time}
+	Opened {date}	Otwarto {date}
+	Modified {date}	Zmieniono {date}
+homeBadge	Open	Otwarty
+	File missing	Brak pliku
+	Remove {name} from Recent	Usuń {name} z ostatnich
+	Remove from Recent	Usuń z ostatnich
+	Add to Folder	Dodaj do folderu
+	Remove from Folder	Usuń z folderu
+	Folder name	Nazwa folderu
+	No folder chosen	Nie wybrano folderu
+	For example: Flyers 2026	Na przykład: Ulotki 2026
+	Change…	Zmień…
+	Create a new folder in:	Utwórz nowy folder w:
+	Use an existing folder:	Użyj istniejącego folderu:
+	PhotoCraft never moves or deletes your files. Removing a folder from Home only takes it off the list.	PhotoCraft nigdy nie przenosi ani nie usuwa Twoich plików. Usunięcie folderu ze strony Start usuwa go tylko z listy.
+	Save As and Save a Copy start here (.psd, .pcraft).	Zapisz jako i Zapisz kopię zaczynają tutaj (.psd, .pcraft).
+	Export As, Quick Export and Save for Web start here (PNG, JPEG…).	Eksportuj jako, Szybki eksport i Zapisz dla Internetu zaczynają tutaj (PNG, JPEG…).
+	Open and Place start here: photos, logos and other material.	Otwórz i Umieść zaczynają tutaj: zdjęcia, logo i inne materiały.
+	Same as Projects until you choose one.	Tak jak Projekty, dopóki nie wybierzesz innego.
